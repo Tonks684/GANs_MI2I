@@ -21,7 +21,7 @@ if __name__ == 'main':
     output_image_folder = "/hpc/projects/upt/samuel_tonks_experimental_space/datasets/a549_hoechst/"
     for a549_hoechst_folder in tqdm(range(1,29)):
         train_dataset_url = \
-        f"https://public.czbiohub.org/comp.micro/viscy/VSCyto2D/training/a549_hoechst_cellmask_train_val.zarr/0/0/{ a549_hoechst_folder}/0"
+        f"https://public.czbiohub.org/comp.micro/viscy/VSCyto2D/training/a549_hoechst_cellmask_train_val.zarr/0/0/{a549_hoechst_folder}/0"
         try:
             dataset = zarr.open(train_dataset_url, mode='r')
             print("Remote dataset accessed successfully.")
