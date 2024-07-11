@@ -16,7 +16,7 @@ def crop_image(image):
     
     return crops
 
-if __name__ == 'main':
+if __name__ == "__main__":
     
     output_image_folder = "/hpc/projects/upt/samuel_tonks_experimental_space/datasets/a549_hoechst/"
     for a549_hoechst_folder in tqdm(range(1,29)):
@@ -25,27 +25,29 @@ if __name__ == 'main':
         try:
             dataset = zarr.open(train_dataset_url, mode='r')
             print("Remote dataset accessed successfully.")
+            dataset_np = np.array(dataset)
+            for img in tqdm(range(dataset_np.shape[2])):
+                input = dataset_np[[0,0,img]]
+                input_crops = crop_image(input)
+                for i, crop in enumerate(input_crops):
+                    output_path = os.path.join(output_image_folder,'input', f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
+                    imsave(output_path, crop.astype(np.uint16),imagej=True)
+                    print(f"Saved crop to {output_path}")
+                nuclei = dataset_np[[0,1,img]]
+                nuclei_crops = crop_image(nuclei)
+                for i, crop in enumerate(nuclei_crops):
+                    output_path = os.path.join(output_image_folder,'nuclei', f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
+                    imsave(output_path, crop.astype(np.uint16),imagej=True)
+                    print(f"Saved crop to {output_path}")
+                cyto = dataset_np[[0,2,img]]
+                cyto_crops = crop_image(cyto)
+                for i, crop in enumerate(cyto_crops):
+                    output_path = os.path.join(output_image_folder,'input', f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
+                    imsave(output_path, crop.astype(np.uint16),imagej=True)
+                    print(f"Saved crop to {output_path}")
+                
+
+
         except Exception as e:
             print(f"Failed to access remote dataset: {e}")
-        dataset_np = np.array(dataset)
-        for img in tqdm(range(dataset_np.shape[2])):
-            input = dataset_np[[0,0,img]]
-            input_crops = crop_image(input)
-            for i, crop in enumerate(input_crops):
-                output_path = os.path.join(output_image_folder,'input', f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
-                imsave(output_path, crop.astype(np.uint16),imagej=True)
-                print(f"Saved crop to {output_path}")
-            nuclei = dataset_np[[0,1,img]]
-            nuclei_crops = crop_image(nuclei)
-            for i, crop in enumerate(nuclei_crops):
-                output_path = os.path.join(output_image_folder,'nuclei', f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
-                imsave(output_path, crop.astype(np.uint16),imagej=True)
-                print(f"Saved crop to {output_path}")
-            cyto = dataset_np[[0,2,img]]
-            cyto_crops = crop_image(cyto)
-            for i, crop in enumerate(cyto_crops):
-                output_path = os.path.join(output_image_folder,'input', f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
-                imsave(output_path, crop.astype(np.uint16),imagej=True)
-                print(f"Saved crop to {output_path}")
-            
-
+        
