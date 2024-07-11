@@ -2,11 +2,11 @@ import numpy as np
 import os
 import ntpath
 import time
-#from . import util
 from . import my_util as util
 from . import html
 import scipy.misc
 from PIL import Image
+import matplotlib.pyplot as plt
 
 try:
     from StringIO import StringIO  # Python 2.7
@@ -114,6 +114,34 @@ class Visualizer():
         print(message)
         with open(self.log_name, 'a') as log_file:
             log_file.write('%s\n' % message)
+
+    def results_plot(self,input,target,predictions,titles,writer,epoch):
+        fig, axs = plt.subplots(input.shape[0], 3, figsize=(10, 30))
+
+        # Set the titles for each column
+        axs[0, 0].set_title(titles[0])
+        axs[0, 1].set_title(titles[1])
+        axs[0, 2].set_title(titles[2])
+
+        # Iterate over each row and plot the corresponding images
+        for row in range(10):
+            # Plot the Brightfield image in the first column
+            axs[row, 0].imshow(input[row, 0],cmap='gray')
+            axs[row, 0].axis('off')
+
+            # Plot the Fluorescence Stain image in the second column
+            axs[row, 1].imshow(target[row, 0],cmap='gray')
+            axs[row, 1].axis('off')
+
+            # Plot the Virtual Stain image in the third column
+            axs[row, 2].imshow(predictions[row, 0],cmap='gray') #, vmin=np.percentile(B_f[row, 0],0.05), vmax = np.percentile(B_f[row, 0],0.95))
+            axs[row, 2].axis('off')
+
+        # Adjust the spacing between subplots
+        plt.tight_layout()
+
+        # Add the plot to TensorBoard
+        writer.add_figure("Qualitative Virtual Stain Results", fig,global_step=epoch)
 
     # save image to the disk
     def save_images(self, webpage, visuals, image_path):
