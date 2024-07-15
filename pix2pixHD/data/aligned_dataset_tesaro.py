@@ -13,14 +13,14 @@ class AlignedDataset(BaseDataset):
         self.root = opt.dataroot
 
         ### input A (label maps)
-        dir_A = 'brightfield'
-        self.dir_A = os.path.join(opt.dataroot,dir_A, f'{opt.phase}_A')
+        dir_A = 'input'
+        self.dir_A = os.path.join(opt.dataroot,dir_A, f'{opt.phase}')
         self.A_paths = sorted(make_dataset(self.dir_A))
 
         ### input B (real images)
         if opt.isTrain or opt.phase == 'val':
-            dir_B = 'fluorescence'
-            self.dir_B = os.path.join(opt.dataroot,dir_B, f'{opt.phase}_B')
+         
+            self.dir_B = os.path.join(opt.dataroot,opt.target, f'{opt.phase}')
             self.B_paths = sorted(make_dataset(self.dir_B))
 
         ### instance maps
