@@ -8,38 +8,60 @@ import os
 from tifffile import imsave
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
+
+def tensors2ims(image_tensors, imtype=np.uint16,normalize=True,stack_predictions=False):
+    image_tensors = image_tensors.cpu().detach().numpy()
+    if imtype == np.uint16:
+        if normalize:
+            image_numpy = (np.array(image_tensors) + 1) / 2.0 * 65535.0
+        else:
+            image_numpy =np.array (image_numpy) * 65535.0
+        image_numpy = np.clip(image_numpy, 0, 65535)
+    elif imtype == np.uint8:
+        if normalize:
+            image_numpy = (np.array(image_tensors) + 1) / 2.0 * 255.0
+        else:
+            image_numpy = np.array(image_numpy) * 255.0
+        image_numpy = np.clip(image_numpy, 0, 255)
+    else:
+        if normalize:
+            image_numpy = (np.array(image_tensors) + 1) / 2.0
+        else:
+            image_numpy = np.transpose(image_numpy, (1, 2, 0))
+            image_numpy = np.clip(image_numpy, 0, 1)
+    return image_numpy.astype(imtype)
+
+
+
 def tensor2im(image_tensor, imtype=np.uint16,normalize=True,stack_predictions=False):
     if isinstance(image_tensor, list):
         image_numpy = []
         for i in range(len(image_tensor)):
             image_numpy.append(tensor2im(image_tensor[i], imtype, normalize))
         return image_numpy
-    # image_numpy = image_tensor.cpu().float().numpy()
     image_numpy = image_tensor.detach().cpu().float().numpy()
     
-    #print(image_numpy.shape)
-    try:
-        if imtype == np.uint16:
-            if normalize:
-                image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 65535.0
-            else:
-                image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 65535.0
-            image_numpy = np.clip(image_numpy, 0, 65535)
-        elif imtype == np.uint8:
-            if normalize:
-                image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
-            else:
-                image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0
-            image_numpy = np.clip(image_numpy, 0, 255)
-        elif imtype == np.float32:
-            if normalize:
-                image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0
-            else:
-                image_numpy = np.transpose(image_numpy, (1, 2, 0))
+    if imtype == np.uint16:
+        if normalize:
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 65535.0
+        else:
+            image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 65535.0
+        image_numpy = np.clip(image_numpy, 0, 65535)
+    elif imtype == np.uint8:
+        if normalize:
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+        else:
+            image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0
+        image_numpy = np.clip(image_numpy, 0, 255)
+    else:
+        if normalize:
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0
+        else:
+            image_numpy = np.transpose(image_numpy, (1, 2, 0))
 #             image_numpy = np.clip(image_numpy, 0, 1)
         
-    except ValueError:
-        print('imtype must be np.uint16, np.uint8 or np.float32 returing as 0 to 1')
+
+
     return image_numpy.astype(imtype)
 
 # Converts a one-hot tensor into a colorful label map

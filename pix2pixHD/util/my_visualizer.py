@@ -115,7 +115,7 @@ class Visualizer():
         with open(self.log_name, 'a') as log_file:
             log_file.write('%s\n' % message)
 
-    def results_plot(self,input,target,predictions,titles,writer,epoch):
+    def results_plot(self,input,target,predictions,titles,writer,epoch,rows):
         fig, axs = plt.subplots(input.shape[0], 3, figsize=(10, 30))
 
         # Set the titles for each column
@@ -124,7 +124,7 @@ class Visualizer():
         axs[0, 2].set_title(titles[2])
 
         # Iterate over each row and plot the corresponding images
-        for row in range(10):
+        for row in range(rows):
             # Plot the Brightfield image in the first column
             axs[row, 0].imshow(input[row, 0],cmap='gray')
             axs[row, 0].axis('off')

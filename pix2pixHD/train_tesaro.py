@@ -68,18 +68,18 @@ def train_epoch(opt, model, visualizer, dataset_train, dataset_size, optimizer_G
             visualizer.print_current_errors(epoch, epoch_iter, errors, t)
             visualizer.plot_current_errors(errors, total_steps) 
         ### display output images
-        visuals = OrderedDict([('input_label',
-                                util.tensor2label(data['label'][0],
-                                                  opt.label_nc)),
+        visuals = OrderedDict([('label',
+                                util.tensor2im(data['label'][0],imtype=np.uint16)),
                                ('synthesized_image',
-                                util.tensor2im(generated.data[0])),
-                               ('real_image', util.tensor2im(data['image'][0]))])
+                                util.tensor2im(generated.data[0],imtype=np.uint16)),
+                               ('real_image', util.tensor2im(data['image'][0],imtype=np.uint16))])
         if save_fake:
             visualizer.display_current_results(visuals, epoch, total_steps)
-
+        
         ### save latest model
-        if total_steps % opt.save_latest_freq == save_delta:
-            print('saving the latest model (epoch %d, total_steps %d)' % (epoch, total_steps))
+       # if total_steps % opt.save_latest_freq == save_delta:
+        if epoch % 20 == 0:
+            print('saving the latest model (epoch %d)' % (epoch))
             model.module.save('latest')
             np.savetxt(iter_path, (epoch, epoch_iter), delimiter=',', fmt='%d')
 
@@ -93,9 +93,11 @@ def train_epoch(opt, model, visualizer, dataset_train, dataset_size, optimizer_G
 
         if epoch_iter >= dataset_size:
                 break
-        running_loss_G += loss_G
-        running_loss_D += loss_D
-    
+        running_loss_G_GAN += loss_G_GAN
+        running_loss_G_GAN_Feat += loss_G_GAN_Feat
+        running_loss_D_real += loss_D_real
+        running_loss_D_fake += loss_D_fake
+        running_loss_G_VGG += loss_G_VGG
     return running_loss_D_fake / len(dataset_train), running_loss_D_real/ len(dataset_train), running_loss_G_GAN / len(dataset_train), running_loss_G_GAN_Feat / len(dataset_train), running_loss_G_VGG/ len(dataset_train), np.mean(ssim_scores), np.mean(psnr_scores)
 
 def val_epoch(model, dataset_val):
@@ -132,21 +134,19 @@ def val_epoch(model, dataset_val):
             running_loss_G_VGG += loss_G_VGG
             
             visuals = OrderedDict([('input_label',
-                                util.tensor2label(data['label'][0],
-                                                  opt.label_nc)),
+                                util.tensor2im(data['label'][0],imtype=np.uint16)),
                                ('synthesized_image',
-                                util.tensor2im(generated.data[0])),
-                               ('real_image', util.tensor2im(data['image'][0]))])
+                                util.tensor2im(generated.data[0],imtype=np.uint16)),
+                               ('real_image', util.tensor2im(data['image'][0],imtype=np.uint16))])
             gen_image = visuals['synthesized_image'][:,:,0]
             gt_image = visuals['real_image'][:,:,0]
-            # if opt.val_metric == "ssim":
+            
             score_ssim = ssim(gt_image, gen_image)
             ssim_scores.append(score_ssim)
-            # elif opt.val_metric == "psnr":
+            
             score_psnr = psnr(gt_image, gen_image)
             psnr_scores.append(score_psnr)
-
-    return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensor2im(generated.data[0]), util.tensor2im(data['image'][0]), util.tensor2label(data['label'][0])
+        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(generated.data,imtype=np.uint16), util.tensors2ims(data['image'],imtype=np.uint16), util.tensors2ims(data['label'],imtype=np.uint16)
 
 
 
@@ -158,7 +158,8 @@ def train(opt, model, visualizer, dataset_train, dataset_size, optimizer_G, opti
         
         train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, mean_ssim, mean_psnr = train_epoch(opt, model, visualizer, dataset_train, dataset_size, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, iter_path, display_delta, print_delta, save_delta)
         [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG, val_ssim, val_psnr], virtual_stain, fluorescence, brightfield = val_epoch(model, dataset_val)
-        visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Bright-field', 'Fluorescence', 'Virtual Stain'],writer,epoch)
+#        print(brightfield.shape,virtual_stain.shape, fluorescence.shape)
+        visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Bright-field', 'Fluorescence', 'Virtual Stain'],writer,epoch,rows=brightfield.shape[0])
 
     # Tensorboard Logging
         epoch_discriminator = {'D_fake': train_loss_D_fake, 'D_real': train_loss_D_real}
@@ -246,7 +247,7 @@ if __name__ == '__main__':
         model, [optimizer_G, optimizer_D] = amp.initialize(model, [model.optimizer_G, model.optimizer_D], opt_level='O1')
         model = torch.nn.DataParallel(model, device_ids=opt.gpu_ids)
     else:
-        optimizer_G, optimizer_D = model.optimizer_G, model.optimizer_D
+        optimizer_G, optimizer_D = model.module.optimizer_G, model.module.optimizer_D
     total_steps = (start_epoch-1) * dataset_size + epoch_iter
     print("Total Steps {}".format(total_steps))
     display_delta = total_steps % opt.display_freq
