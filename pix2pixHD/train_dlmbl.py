@@ -77,13 +77,6 @@ def train_epoch(opt, model, visualizer, dataset_train, dataset_size, optimizer_G
         if save_fake:
             visualizer.display_current_results(visuals, epoch, total_steps)
         
-        ### save latest model
-       # if total_steps % opt.save_latest_freq == save_delta:
-        if epoch % 20 == 0:
-            print('saving the latest model (epoch %d)' % (epoch))
-            model.module.save('latest')
-            np.savetxt(iter_path, (epoch, epoch_iter), delimiter=',', fmt='%d')
-
         # Compute metric
         gen_image = visuals['synthesized_image'][:,:,0]
         gt_image = visuals['real_image'][:,:,0]
@@ -164,7 +157,6 @@ def train(opt, model, visualizer, dataset_train, dataset_size, optimizer_G, opti
             epoch_iter = epoch_iter % dataset_size
         train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, mean_ssim, mean_psnr = train_epoch(opt, model, visualizer, dataset_train, dataset_size, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, iter_path, display_delta, print_delta, save_delta)
         [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG, val_ssim, val_psnr], virtual_stain, fluorescence, brightfield = val_epoch(model, dataset_val,epoch)
-#        print(brightfield.shape,virtual_stain.shape, fluorescence.shape)
         visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Bright-field', 'Fluorescence', 'Virtual Stain'],writer,epoch,rows=brightfield.shape[0])
 
     # Tensorboard Logging
