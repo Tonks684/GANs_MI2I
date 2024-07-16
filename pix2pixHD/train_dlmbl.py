@@ -15,6 +15,7 @@ from models.models import create_model
 from data.data_loader_dlmbl import CreateDataLoader    
 import util.my_util as util
 from util.my_visualizer import Visualizer
+from pathlib import Path
 from tensorboardX import SummaryWriter
 def lcm(a,b): return abs(a * b)/math.gcd(a,b) if a and b else 0
 
@@ -143,10 +144,11 @@ def val_epoch(model, dataset_val, epoch):
             bf = data['label'].cpu().detach().numpy()
             fl = data['image'].cpu().detach().numpy()
             vs = generated.data.cpu().detach().numpy() 
+
             imsave(f'{opt.checkpoints_dir}/bf/epoch_{epoch}.tiff',bf.astype(np.float32),imagej=True)
             imsave(f'{opt.checkpoints_dir}/fl/epoch_{epoch}.tiff',fl.astype(np.float32),imagej=True)
             imsave(f'{opt.checkpoints_dir}/vs/epoch_{epoch}.tiff',vs.astype(np.float32),imagej=True)
-        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(generated.data,imtype=np.uint16), util.tensors2ims(data['image'],imtype=np.uint16), data['label'])
+        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(generated.data,imtype=np.uint16), util.tensors2ims(data['image'],imtype=np.uint16), data['label']
 
 
 
@@ -239,6 +241,9 @@ if __name__ == '__main__':
     opt.phase = 'train'
     model = create_model(opt)
     visualizer = Visualizer(opt)
+    Path(f'{opt.checkpoints_dir}/bf/').mkdir(parents=True, exist_ok=True)
+    Path(f'{opt.checkpoints_dir}/vs/').mkdir(parents=True, exist_ok=True)
+    Path(f'{opt.checkpoints_dir}/fl/').mkdir(parents=True, exist_ok=True)
     
     if opt.fp16:
         from apex import amp
