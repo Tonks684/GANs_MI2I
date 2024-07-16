@@ -146,7 +146,7 @@ def val_epoch(model, dataset_val, epoch):
             imsave(f'{opt.checkpoints_dir}/bf/epoch_{epoch}.tiff',bf.astype(np.float32),imagej=True)
             imsave(f'{opt.checkpoints_dir}/fl/epoch_{epoch}.tiff',fl.astype(np.float32),imagej=True)
             imsave(f'{opt.checkpoints_dir}/vs/epoch_{epoch}.tiff',vs.astype(np.float32),imagej=True)
-        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(generated.data,imtype=np.uint16), util.tensors2ims(data['image'],imtype=np.uint16), util.tensors2ims(data['label'],imtype=np.uint16)
+        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(generated.data,imtype=np.uint16), util.tensors2ims(data['image'],imtype=np.uint16), data['label'])
 
 
 
