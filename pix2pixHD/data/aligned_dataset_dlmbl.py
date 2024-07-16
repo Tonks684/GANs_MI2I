@@ -15,12 +15,12 @@ class AlignedDataset(BaseDataset):
         ### input A (label maps)
         dir_A = 'input'
         self.dir_A = os.path.join(opt.dataroot,dir_A, f'{opt.phase}')
-        self.A_paths = sorted([p for p in Path(self.dir_A).glob('**/*.tiff')])
+        self.A_paths = sorted(make_dataset(self.dir_A))
 
         ### input B (real images)
         if opt.isTrain or opt.phase == 'val':         
             self.dir_B = os.path.join(opt.dataroot,opt.target, f'{opt.phase}')
-            self.B_paths = sorted([p for p in Path(self.dir_B).glob('**/*.tiff')])
+            self.B_paths = sorted(make_dataset(self.dir_B))
        
         ### instance maps
         if not opt.no_instance:
@@ -69,9 +69,6 @@ class AlignedDataset(BaseDataset):
 
         input_dict = {'label': A_tensor, 'inst': inst_tensor, 'image': B_tensor,
                       'feat': feat_tensor, 'path': A_path}
-        print('----')
-        print(A_path,B_path)
-        print('---')
         return input_dict
 
     def __len__(self):
