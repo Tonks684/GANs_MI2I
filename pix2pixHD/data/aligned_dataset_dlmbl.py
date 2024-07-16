@@ -5,7 +5,7 @@ from data.image_folder import make_dataset
 from PIL import Image
 import numpy as np
 import torch
-
+from pathlib import Path
 
 class AlignedDataset(BaseDataset):
     def initialize(self, opt):
@@ -13,18 +13,15 @@ class AlignedDataset(BaseDataset):
         self.root = opt.dataroot
 
         ### input A (label maps)
-    #    dir_A = 'input'
-        self.dir_A = os.path.join(opt.dataroot,f'{opt.phase}_A') #dir_A, f'{opt.phase}')
+        dir_A = 'input'
+        self.dir_A = os.path.join(opt.dataroot,dir_A, f'{opt.phase}')
         self.A_paths = sorted(make_dataset(self.dir_A))
 
         ### input B (real images)
-        if opt.isTrain or opt.phase == 'val':
-         
-            self.dir_B = os.path.join(opt.dataroot,f'{opt.phase}_B')#opt.target, f'{opt.phase}')
+        if opt.isTrain or opt.phase == 'val':         
+            self.dir_B = os.path.join(opt.dataroot,opt.target, f'{opt.phase}')
             self.B_paths = sorted(make_dataset(self.dir_B))
-            #print('----')
-            #print(len(self.B_paths))
-            #print('----')
+       
         ### instance maps
         if not opt.no_instance:
             self.dir_inst = os.path.join(opt.dataroot, opt.phase + '_inst')
@@ -41,6 +38,7 @@ class AlignedDataset(BaseDataset):
         ### input A (Brightfield images )
         A_path = self.A_paths[index]
         A = Image.open(A_path)
+        
         params = get_params(self.opt, A.size)
         if self.opt.label_nc == 0:
             transform_A = get_transform(self.opt, params)
@@ -71,7 +69,6 @@ class AlignedDataset(BaseDataset):
 
         input_dict = {'label': A_tensor, 'inst': inst_tensor, 'image': B_tensor,
                       'feat': feat_tensor, 'path': A_path}
-
         return input_dict
 
     def __len__(self):

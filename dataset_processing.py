@@ -19,7 +19,7 @@ def crop_image(image):
 if __name__ == "__main__":
     
     output_image_folder = "/hpc/projects/upt/samuel_tonks_experimental_space/datasets/a549_hoechst/"
-    for a549_hoechst_folder in tqdm(range(1,29)):
+    for a549_hoechst_folder in tqdm(range(1,30)):
         train_dataset_url = \
         f"https://public.czbiohub.org/comp.micro/viscy/VSCyto2D/training/a549_hoechst_cellmask_train_val.zarr/0/0/{a549_hoechst_folder}/0"
         try:
@@ -27,18 +27,21 @@ if __name__ == "__main__":
             print("Remote dataset accessed successfully.")
             dataset_np = np.array(dataset)
             for img in tqdm(range(dataset_np.shape[2])):
-                input = dataset_np[0,0,img]
-                input_crops = crop_image(input)
+                
+                input_x = dataset_np[0,0,img]
+                input_crops = crop_image(input_x)
                 for i, crop in enumerate(input_crops):
                     output_path = os.path.join(output_image_folder,'input', f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
                     imsave(output_path, crop.astype(np.float32),imagej=True)
                     print(f"Saved crop to {output_path}")
+                
                 nuclei = dataset_np[0,1,img]
                 nuclei_crops = crop_image(nuclei)
                 for i, crop in enumerate(nuclei_crops):
                     output_path = os.path.join(output_image_folder,'nuclei', f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
                     imsave(output_path, crop.astype(np.float32),imagej=True)
                     print(f"Saved crop to {output_path}")
+                
                 cyto = dataset_np[0,2,img]
                 cyto_crops = crop_image(cyto)
                 for i, crop in enumerate(cyto_crops):
