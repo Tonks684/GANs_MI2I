@@ -1,4 +1,4 @@
-name: null
+name: pix2pixHDCUDA11
 channels:
   - pytorch
   - anaconda
@@ -134,5 +134,5 @@ dependencies:
     - dominate==2.6.0
     - h5py==3.7.0
     - numpy==1.21.6
-prefix: /hpc/user_apps/bioimaging_analytics/conda_environments/pix2pixHD_CUDA11
+prefix: ./pix2pixHDCUDA11
 
