@@ -231,19 +231,21 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Phase Contrast', 'Fluorescence', 'Virtual Stain'],writer,epoch,rows=brightfield.shape[0])
 
         # Tensorboard Logging
-        epoch_discriminator = {'D_fake': train_loss_D_fake, 'D_real': train_loss_D_real}
-        writer.add_scalars('Discriminator Probabilities Train', epoch_discriminator, epoch)
-        epoch_discriminator = {'D_fake': val_loss_D_fake, 'D_real': val_loss_D_real}
-        writer.add_scalars('Discriminator Probabilities Validation', epoch_discriminator, epoch)
-        epoch_generator = {'G_GAN_Train': train_loss_G_GAN, 'G_GAN_Validation': val_loss_G_GAN}
-        writer.add_scalars('Generator Loss GAN', epoch_generator, epoch)
-        epoch_generator = {'G_GAN_Feat_Train': train_loss_G_Feat, 'G_GAN_Feat_Validation': val_loss_G_Feat}
-        writer.add_scalars('Generator Loss GAN Feat', epoch_generator, epoch)
-        epoch_generator = {'G_VGG_Train': train_loss_G_VGG, 'G_VGG_Validation': val_loss_G_VGG}
-        writer.add_scalars('Generator Loss VGG', epoch_generator, epoch)
-        epoch_ssim = {'SSIM_Train': mean_ssim, 'SSIM_Validation': val_ssim}
+        epoch_discriminator = {'fake_is_fake': train_loss_D_fake, 'real_is_real': train_loss_D_real}
+        writer.add_scalars('Discriminator Predicted Probability on Training Set', epoch_discriminator, epoch)
+        
+        epoch_discriminator = {'fake_is_fake': val_loss_D_fake, 'real_is_real': val_loss_D_real}
+        writer.add_scalars('Discriminator Predicted Probability on Validation Set', epoch_discriminator, epoch)
+        
+        epoch_generator = {'train': train_loss_G_GAN, 'validation': val_loss_G_GAN}
+        writer.add_scalars('Generator Least Square Loss', epoch_generator, epoch)
+        
+        epoch_generator = {'train': train_loss_G_Feat, 'validation': val_loss_G_Feat}
+        writer.add_scalars('Generator Feature Matching Loss', epoch_generator, epoch)
+
+        epoch_ssim = {'train': mean_ssim, 'validation': val_ssim}
         writer.add_scalars('SSIM', epoch_ssim, epoch)
-        epoch_psnr = {'PSNR_Train': mean_psnr, 'PSNR_Validation': val_psnr}
+        epoch_psnr = {'train': mean_psnr, 'validation': val_psnr}
         writer.add_scalars('PSNR', epoch_psnr, epoch)
 
     print('Training Losses: D_fake: {}, D_real: {}, G_GAN: {}, G_GAN_Feat: {}, G_VGG: {}'.format(train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG))
