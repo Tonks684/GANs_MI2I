@@ -134,5 +134,7 @@ dependencies:
     - dominate==2.6.0
     - h5py==3.7.0
     - numpy==1.21.6
+    - tensorboardX 
+    - apex
 prefix: ./pix2pixHDCUDA11
 
