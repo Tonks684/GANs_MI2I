@@ -1,30 +1,71 @@
 from __future__ import print_function
 import torch
 import numpy as np
+import random
 from PIL import Image
 import numpy as np
 import os
-
+from tifffile import imsave
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
-def tensor2im(image_tensor, imtype=np.uint8, normalize=True):
+
+def tensors2ims(image_tensors, imtype=np.uint16,normalize=True,stack_predictions=False):
+    image_tensors = image_tensors.cpu().detach().numpy()
+    if imtype == np.uint16:
+        if normalize:
+            image_numpy = (np.array(image_tensors) + 1) / 2.0 * 65535.0
+        else:
+            image_numpy =np.array (image_numpy) * 65535.0
+        image_numpy = np.clip(image_numpy, 0, 65535)
+    elif imtype == np.uint8:
+        if normalize:
+            image_numpy = (np.array(image_tensors) + 1) / 2.0 * 255.0
+        else:
+            image_numpy = np.array(image_numpy) * 255.0
+        image_numpy = np.clip(image_numpy, 0, 255)
+    else:
+        if normalize:
+            image_numpy = (np.array(image_tensors) + 1) / 2.0
+        else:
+            image_numpy = np.transpose(image_numpy, (1, 2, 0))
+            image_numpy = np.clip(image_numpy, 0, 1)
+    return image_numpy.astype(imtype)
+
+
+
+def tensor2im(image_tensor, imtype=np.uint16,normalize=True,stack_predictions=False):
     if isinstance(image_tensor, list):
         image_numpy = []
         for i in range(len(image_tensor)):
             image_numpy.append(tensor2im(image_tensor[i], imtype, normalize))
         return image_numpy
-    image_numpy = image_tensor.cpu().float().numpy()
-    if normalize:
-        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+    image_numpy = image_tensor.detach().cpu().float().numpy()
+    
+    if imtype == np.uint16:
+        if normalize:
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 65535.0
+        else:
+            image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 65535.0
+        image_numpy = np.clip(image_numpy, 0, 65535)
+    elif imtype == np.uint8:
+        if normalize:
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+        else:
+            image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0
+        image_numpy = np.clip(image_numpy, 0, 255)
     else:
-        image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0
-    image_numpy = np.clip(image_numpy, 0, 255)
-    if image_numpy.shape[2] == 1 or image_numpy.shape[2] > 3:
-        image_numpy = image_numpy[:,:,0]
+        if normalize:
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0
+        else:
+            image_numpy = np.transpose(image_numpy, (1, 2, 0))
+#             image_numpy = np.clip(image_numpy, 0, 1)
+        
+
+
     return image_numpy.astype(imtype)
 
 # Converts a one-hot tensor into a colorful label map
-def tensor2label(label_tensor, n_label, imtype=np.uint8):
+def tensor2label(label_tensor, n_label, imtype=np.uint16):
     if n_label == 0:
         return tensor2im(label_tensor, imtype)
     label_tensor = label_tensor.cpu().float()
@@ -35,9 +76,10 @@ def tensor2label(label_tensor, n_label, imtype=np.uint8):
     return label_numpy.astype(imtype)
 
 def save_image(image_numpy, image_path):
-    image_pil = Image.fromarray(image_numpy)
-    image_pil.save(image_path)
-
+    #image_pil = Image.fromarray(image_numpy)
+    #image_pil.save(image_path)
+    imsave(image_path.replace('.jpg','.tiff'),image_numpy.astype(np.float32),imagej=True)
+    
 def mkdirs(paths):
     if isinstance(paths, list) and not isinstance(paths, str):
         for path in paths:
@@ -82,6 +124,19 @@ def labelcolormap(N):
             cmap[i, 2] = b
     return cmap
 
+
+def score_json_row(
+    json_row, epoch: int, phase: str, root_name: str,
+        psnr_score, ssim_score):
+    json_row[root_name].append({
+        'epoch': epoch,
+        'phase': phase,
+        'ssim': ssim_score,
+        'psnr': psnr_score
+    })
+    return json_row
+
+
 class Colorize(object):
     def __init__(self, n=35):
         self.cmap = labelcolormap(n)
@@ -98,3 +153,17 @@ class Colorize(object):
             color_image[2][mask] = self.cmap[label][2]
 
         return color_image
+
+def set_seed(random_seed: int) -> None:
+    """Sets seed and turns pytorch non-deterministic (as far as one can)"""
+    random.seed(random_seed)
+    np.random.seed(random_seed)
+    torch.manual_seed(random_seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(random_seed)
+        torch.cuda.manual_seed_all(random_seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(random_seed)
+
+    
