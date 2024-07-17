@@ -254,7 +254,6 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
     print('PSNR: Train: {}, Validation: {}'.format(mean_psnr, val_psnr))    
     print('End of epoch %d / %d \t Time Taken: %d sec' %
           (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
-
     ### save model for this epoch
     if epoch % opt.save_epoch_freq == 0:
         print('Saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))
