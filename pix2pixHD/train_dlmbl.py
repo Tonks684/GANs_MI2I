@@ -13,14 +13,14 @@ import json
 from options.train_options import TrainOptions
 from models.models import create_model
 from data.data_loader_dlmbl import CreateDataLoader    
-import util.my_util as util
-from util.my_visualizer import Visualizer
+import util.util as util
+from util.visualizer import Visualizer
 from pathlib import Path
 from tensorboardX import SummaryWriter
 def lcm(a,b): return abs(a * b)/math.gcd(a,b) if a and b else 0
 
 
-def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, display_delta, print_delta):
+def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, display_delta):
     """
     Train the model for one epoch.
 
@@ -35,7 +35,7 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         epoch (int): The current epoch number.
         epoch_iter (int): The current iteration within the epoch.
         display_delta (int): The interval for displaying output images.
-        print_delta (int): The interval for printing and plotting errors.
+    
 
     Returns:
         tuple: A tuple containing the average losses and metrics for the epoch.
@@ -56,6 +56,9 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
     ssim_scores = []
     psnr_scores = [] 
     dataset_size = len(dataset_train)   
+    display_delta = total_steps % opt.display_freq #
+    print_delta = total_steps % opt.print_freq
+
     for i, data in enumerate(dataset_train, start=epoch_iter):
         if total_steps % opt.print_freq == print_delta:
             iter_start_time = time.time()
@@ -191,7 +194,7 @@ def val_epoch(model, dataset_val, epoch):
 
 
 
-def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optimizer_D, total_steps, start_epoch, epoch_iter, iter_path, display_delta, print_delta, save_delta, writer):
+def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optimizer_D, start_epoch, epoch_iter, iter_path, display_delta, writer):
     """
     Trains the model using the specified options and datasets.
 
@@ -203,19 +206,15 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         dataset_val: The validation dataset.
         optimizer_G: The optimizer for the generator.
         optimizer_D: The optimizer for the discriminator.
-        total_steps (int): The total number of training steps.
         start_epoch (int): The starting epoch for training.
         epoch_iter (int): The current iteration within the epoch.
         iter_path: The path to save the current iteration.
-        display_delta (int): The interval for displaying training progress.
-        print_delta (int): The interval for printing training losses.
-        save_delta (int): The interval for saving the model.
         writer: The writer for logging training metrics.
 
     Returns:
         None - but training outputs are saved to Tensorboard
     """
-
+    total_steps = (start_epoch-1) * (len(dataset_train)+len(dataset_val)) + epoch_iter 
     for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         epoch_start_time = time.time()
         if epoch == start_epoch:
@@ -224,7 +223,7 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         else:
             epoch_iter = epoch_iter % len(dataset_train)
 
-        train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, mean_ssim, mean_psnr = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, iter_path, display_delta, print_delta, save_delta)
+        train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, mean_ssim, mean_psnr = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, iter_path, display_delta)
         
         [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG, val_ssim, val_psnr], virtual_stain, fluorescence, brightfield = val_epoch(model, dataset_val, epoch)
         
