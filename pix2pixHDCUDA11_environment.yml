@@ -137,5 +137,6 @@ dependencies:
     - tensorboardX 
     - apex
     - zarr
+    - cellpose
 prefix: ./pix2pixHDCUDA11
 
