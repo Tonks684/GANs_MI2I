@@ -36,6 +36,27 @@ def default_loader(path):
 
 
 class ImageFolder(data.Dataset):
+    """
+    A custom dataset class for loading images from a folder.
+
+    Args:
+        root (str): The root directory path of the image folder.
+        transform (callable, optional): A function/transform that takes in an image and returns a transformed version. Default is None.
+        return_paths (bool, optional): If True, returns the image path along with the image. Default is False.
+        loader (callable, optional): A function to load an image given its path. Default is default_loader.
+
+    Attributes:
+        root (str): The root directory path of the image folder.
+        imgs (list): A list of image paths in the folder.
+        transform (callable): A function/transform that takes in an image and returns a transformed version.
+        return_paths (bool): If True, returns the image path along with the image.
+        loader (callable): A function to load an image given its path.
+
+    Methods:
+        __getitem__(self, index): Retrieves the image and its path (if return_paths is True) at the given index.
+        __len__(self): Returns the total number of images in the dataset.
+
+    """
 
     def __init__(self, root, transform=None, return_paths=False,
                  loader=default_loader):
