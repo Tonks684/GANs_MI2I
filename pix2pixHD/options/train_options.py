@@ -1,6 +1,38 @@
 from .base_options import BaseOptions
 
 class TrainOptions(BaseOptions):
+    """
+    This class defines the training options for the pix2pixHD model.
+
+    Args:
+        BaseOptions (class): The base options class.
+
+    Attributes:
+        display_freq (int): Frequency of showing training results on screen.
+        print_freq (int): Frequency of showing training results on console.
+        save_latest_freq (int): Frequency of saving the latest results.
+        save_epoch_freq (int): Frequency of saving checkpoints at the end of epochs.
+        no_html (bool): Flag to indicate whether to save intermediate training results to [opt.checkpoints_dir]/[opt.name]/web/.
+        debug (bool): Flag to indicate whether to only do one epoch and display at each iteration.
+        continue_train (bool): Flag to indicate whether to continue training by loading the latest model.
+        load_pretrain (str): Path to the pretrained model to load from.
+        which_epoch (str): Which epoch to load? Set to 'latest' to use the latest cached model.
+        phase (str): Phase of the training process ('train', 'val', 'test', etc).
+        niter (int): Number of iterations at starting learning rate.
+        niter_decay (int): Number of iterations to linearly decay learning rate to zero.
+        beta1 (float): Momentum term of Adam optimizer.
+        lr (float): Initial learning rate for Adam optimizer.
+        num_D (int): Number of discriminators to use.
+        n_layers_D (int): Only used if which_model_netD==n_layers.
+        ndf (int): Number of filters in the first convolutional layer of the discriminator.
+        lambda_feat (float): Weight for feature matching loss.
+        no_ganFeat_loss (bool): If specified, do not use discriminator feature matching loss.
+        no_vgg_loss (bool): If specified, do not use VGG feature matching loss.
+        no_lsgan (bool): If specified, do not use least square GAN. If False, use vanilla GAN.
+        pool_size (int): The size of the image buffer that stores previously generated images.
+        isTrain (bool): Flag to indicate whether the options are for training.
+
+    """
     def initialize(self):
         BaseOptions.initialize(self)
         # for displays

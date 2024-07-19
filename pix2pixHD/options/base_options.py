@@ -4,11 +4,18 @@ from util import util
 import torch
 
 class BaseOptions():
+    """
+    Base options class for the experiment.
+    """
+
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.initialized = False
 
     def initialize(self):    
+        """
+        Initialize the command line arguments.
+        """
         # experiment specifics
         self.parser.add_argument('--name', type=str, default='label2city', help='name of the experiment. It decides where to store samples and models')        
         self.parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
@@ -76,6 +83,15 @@ class BaseOptions():
         self.initialized = True
 
     def parse(self, save=True):
+        """
+        Parse the command line arguments and return the options.
+
+        Args:
+            save (bool): Whether to save the options to a file.
+
+        Returns:
+            argparse.Namespace: The parsed command line arguments.
+        """
         if not self.initialized:
             self.initialize()
         self.opt = self.parser.parse_args()
