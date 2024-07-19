@@ -89,7 +89,7 @@ def create_train_val_split(input_folder, nuclei_folder, cyto_folder, split_ratio
     
     # Copy train and val files
     copy_files(train_files, 'train',folders)
-    copy_files(val_files, 'val',folders)
+    copy_files(val_files, 'val', folders)
 
 def save_crops(input_crops, channel_folder, a549_hoechst_folder, img, args):
     """
@@ -105,7 +105,7 @@ def save_crops(input_crops, channel_folder, a549_hoechst_folder, img, args):
     Returns:
         None
     """
-    for i, crop in enumerate(input_crops, args.crop_size):
+    for i, crop in enumerate(input_crops):
         output_path = os.path.join(args.output_image_folder, channel_folder, f"{a549_hoechst_folder}_{img}_crop{i}.tiff")
         imsave(output_path, crop.astype(np.float32), imagej=True)
         print(f"Saved crop to {output_path}")
@@ -116,7 +116,15 @@ if __name__ == "__main__":
     args = argparse.ArgumentParser()
     args.add_argument("--output_image_folder", type=str, required=True)
     args.add_argument("--crop_size", type=int, default=512)
-    args.parse_args()
+    args = args.parse_args()
+
+    #Create folders
+    for folder in ['train','val','test']:
+        os.makedirs(f'{args.output_image_folder}/nuclei/{folder}', exist_ok=True)
+        os.makedirs(f'{args.output_image_folder}/cyto/{folder}', exist_ok=True)
+        os.makedirs(f'{args.output_image_folder}/input/{folder}', exist_ok=True)
+    os.makedirs(f'{args.output_image_folder}/nuclei/test/masks/', exist_ok=True)
+
     #Extract train and validation
     for a549_hoechst_folder in tqdm(range(1,30)):
         train_dataset_url = \
@@ -127,13 +135,13 @@ if __name__ == "__main__":
             dataset_np = np.array(dataset)
             for img in tqdm(range(dataset_np.shape[2])):
                 input_x = dataset_np[0,0,img]
-                input_crops = crop_image(input_x)
+                input_crops = crop_image(input_x, args.crop_size)
                 save_crops(input_crops, 'input', a549_hoechst_folder, img, args)
                 nuclei = dataset_np[0,1,img]
-                nuclei_crops = crop_image(nuclei)
+                nuclei_crops = crop_image(nuclei, args.crop_size)
                 save_crops(nuclei_crops, 'nuclei',a549_hoechst_folder, img, args)
                 cyto = dataset_np[0,2,img]
-                cyto_crops = crop_image(cyto,args.crop_size)
+                cyto_crops = crop_image(cyto, args.crop_size)
                 save_crops(cyto_crops,'cyto', a549_hoechst_folder, img, args)
         except Exception as e:
             print(f"Failed to access remote dataset: {e}")
@@ -150,16 +158,16 @@ if __name__ == "__main__":
             dataset_np = np.array(dataset)
             for img in tqdm(range(dataset_np.shape[2])):
                 input_x = dataset_np[0,0,img]
-                input_crops = crop_image(input_x)
+                input_crops = crop_image(input_x, args.crop_size)
                 save_crops(input_crops,'input/test/', a549_hoechst_folder, img, args)
                 nuclei = dataset_np[0,1,img]
-                nuclei_crops = crop_image(nuclei)
+                nuclei_crops = crop_image(nuclei, args.crop_size)
                 save_crops(nuclei_crops,'nuclei/test/', a549_hoechst_folder, img, args)
                 cyto = dataset_np[0,2,img]
-                cyto_crops = crop_image(cyto,'cyto/test/',args.crop_size)
+                cyto_crops = crop_image(cyto,'cyto/test/', args.crop_size)
                 save_crops(cyto_crops, a549_hoechst_folder, img, args)
                 nuclei_masks = dataset_np[0,3,img]
-                nuclei_crops = crop_image(nuclei_masks)
+                nuclei_crops = crop_image(nuclei_masks, args.crop_size)
                 save_crops(nuclei_crops,'nuclei/test/masks/', a549_hoechst_folder, img, args)
                 
 
