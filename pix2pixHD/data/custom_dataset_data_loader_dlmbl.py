@@ -3,6 +3,16 @@ from data.base_data_loader import BaseDataLoader
 
 
 def CreateDataset(opt):
+    """
+    Create a dataset object based on the given options.
+
+    Args:
+        opt (argparse.Namespace): The options for creating the dataset.
+
+    Returns:
+        dataset (object): The created dataset object.
+
+    """
     dataset = None
     from data.aligned_dataset_dlmbl import AlignedDataset
     dataset = AlignedDataset()
@@ -13,8 +23,12 @@ def CreateDataset(opt):
 
 
 class CustomDatasetDataLoader(BaseDataLoader):
+    """
+    A custom data loader for HEKCells dataset.
+    """
+
     def name(self):
-        return 'Tesaro Data Loader'
+        return 'HEKCells Data Loader'
 
     def initialize(self, opt):
         BaseDataLoader.initialize(self, opt)

@@ -1,6 +1,5 @@
 import os.path
-#from data.base_dataset import BaseDataset, get_params, get_transform, normalize
-from data.my_base_dataset import BaseDataset, get_params, get_transform, normalize
+from GANs_MI2I.pix2pixHD.data.base_dataset import BaseDataset, get_params, get_transform, normalize
 from data.image_folder import make_dataset
 from PIL import Image
 import numpy as np
@@ -8,21 +7,28 @@ import torch
 from pathlib import Path
 
 class AlignedDataset(BaseDataset):
+    """
+    A custom dataset class for loading aligned image datasets.
+
+    Args:
+        opt (argparse.Namespace): The command line arguments.
+    """
+
     def initialize(self, opt):
         self.opt = opt
         self.root = opt.dataroot
 
-        ### input A (label maps)
+        ### input A
         dir_A = 'input'
         self.dir_A = os.path.join(opt.dataroot,dir_A, f'{opt.phase}')
         self.A_paths = sorted(make_dataset(self.dir_A))
 
-        ### input B (real images)
+        ### target B 
         if opt.isTrain or opt.phase == 'val':         
             self.dir_B = os.path.join(opt.dataroot,opt.target, f'{opt.phase}')
             self.B_paths = sorted(make_dataset(self.dir_B))
        
-        ### instance maps
+        ### instance maps ()
         if not opt.no_instance:
             self.dir_inst = os.path.join(opt.dataroot, opt.phase + '_inst')
             self.inst_paths = sorted(make_dataset(self.dir_inst))
@@ -35,7 +41,15 @@ class AlignedDataset(BaseDataset):
         self.dataset_size = len(self.A_paths)
 
     def __getitem__(self, index):
-        ### input A (Brightfield images )
+        """
+        Retrieves a single item from the dataset.
+
+        Args:
+            index (int): The index of the item to retrieve.
+
+        Returns:
+            dict: A dictionary containing the input data and paths.
+        """
         A_path = self.A_paths[index]
         A = Image.open(A_path)
         
@@ -48,14 +62,12 @@ class AlignedDataset(BaseDataset):
             A_tensor = transform_A(A) * 255.0
 
         B_tensor = inst_tensor = feat_tensor = 0
-        ### input B (real images)
         if self.opt.isTrain or self.opt.use_encoded_image:
             B_path = self.B_paths[index]
             B = Image.open(B_path).convert('F')
             transform_B = get_transform(self.opt, params)
             B_tensor = transform_B(B.point(lambda p: p*(1/65535)))
 
-        ### if using instance maps
         if not self.opt.no_instance:
             inst_path = self.inst_paths[index]
             inst = Image.open(inst_path)
@@ -72,7 +84,19 @@ class AlignedDataset(BaseDataset):
         return input_dict
 
     def __len__(self):
+        """
+        Returns the total number of items in the dataset.
+
+        Returns:
+            int: The length of the dataset.
+        """
         return len(self.A_paths) // self.opt.batchSize * self.opt.batchSize
 
     def name(self):
-        return "Tesaro Dataset"
+        """
+        Returns the name of the dataset.
+
+        Returns:
+            str: The name of the dataset.
+        """
+        return "HEKCells Dataset"
