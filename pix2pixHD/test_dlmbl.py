@@ -55,7 +55,7 @@ def inference(dataset, opt, model):
             img_name = img_path[0].split('/')[-1]
             save_path = os.path.join(
                     opt.results_dir, img_name)
-            imsave(save_path, visuals['synthesized_image'].astype(np.uint16),imagej=True)
+            imsave(save_path, visuals['synthesized_image'].astype(np.float32),imagej=True)
 
 def sampling(dataset, opt, model):
     """
@@ -101,4 +101,4 @@ def sampling(dataset, opt, model):
                 image_name = f"img_name_{sample}.tiff"
                 save_path = os.path.join(
                         opt.results_dir, img_name)
-                imsave(save_path, visuals['synthesized_image'].astype(np.uint16),imagej=True)
+                imsave(save_path, visuals['synthesized_image'].astype(np.float32),imagej=True)
