@@ -1,4 +1,4 @@
-name: pix2pixHDCUDA11
+name: pix2pixHD
 channels:
   - pytorch
   - anaconda
@@ -138,5 +138,5 @@ dependencies:
     - apex
     - zarr
     - cellpose
-prefix: ./pix2pixHDCUDA11
+prefix: ./pix2pixHD
 
