@@ -7,6 +7,34 @@ from .base_model import BaseModel
 from . import networks
 
 class Pix2PixHDModel(BaseModel):
+    """
+    Pix2PixHDModel is a class that represents the Pix2PixHD model for image-to-image translation.
+    It inherits from the BaseModel class.
+
+    Attributes:
+        netG (torch.nn.Module): The generator network for image translation.
+        netD (torch.nn.Module): The discriminator network for image translation.
+        netE (torch.nn.Module): The encoder network for feature extraction.
+        isTrain (bool): Indicates whether the model is in training mode or not.
+        use_features (bool): Indicates whether to use additional features for image translation.
+        gen_features (bool): Indicates whether to generate features during image translation.
+        loss_names (list): A list of names for the loss functions used in training.
+        criterionGAN (torch.nn.Module): The GAN loss function.
+        criterionFeat (torch.nn.Module): The feature loss function.
+        criterionVGG (torch.nn.Module): The VGG loss function.
+        optimizer_G (torch.optim.Optimizer): The optimizer for the generator network.
+        optimizer_D (torch.optim.Optimizer): The optimizer for the discriminator network.
+
+    Methods:
+        name(): Returns the name of the model.
+        init_loss_filter(use_gan_feat_loss, use_vgg_loss): Initializes the loss filter function.
+        initialize(opt): Initializes the model with the given options.
+        encode_input(label_map, inst_map, real_image, feat_map, infer): Encodes the input data for the model.
+        discriminate(input_label, test_image, use_pool): Performs discrimination on the input data.
+        forward(label, inst, image, feat, infer): Performs forward pass through the model.
+        inference(label, inst, image): Performs inference on the input data.
+    """
+
     def name(self):
         return 'Pix2PixHDModel'
 
@@ -109,6 +137,19 @@ class Pix2PixHDModel(BaseModel):
             self.optimizer_D = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))
 
     def encode_input(self, label_map, inst_map=None, real_image=None, feat_map=None, infer=False):
+        """
+        Encodes the input label map for the pix2pixHD model.
+
+        Args:
+            label_map (torch.Tensor): The label map tensor.
+            inst_map (torch.Tensor, optional): The instance map tensor. Defaults to None.
+            real_image (torch.Tensor, optional): The real image tensor. Defaults to None.
+            feat_map (torch.Tensor, optional): The feature map tensor. Defaults to None.
+            infer (bool, optional): Whether to perform inference. Defaults to False.
+
+        Returns:
+            Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]: The encoded input tensors.
+        """
         if self.opt.label_nc == 0:
             input_label = label_map.data.cuda()
         else:
@@ -142,6 +183,17 @@ class Pix2PixHDModel(BaseModel):
         return input_label, inst_map, real_image, feat_map
 
     def discriminate(self, input_label, test_image, use_pool=False):
+        """
+        Discriminates between real and fake images.
+
+        Args:
+            input_label (torch.Tensor): The input label tensor.
+            test_image (torch.Tensor): The test image tensor.
+            use_pool (bool, optional): Whether to use a fake image pool. Defaults to False.
+
+        Returns:
+            torch.Tensor: The discriminator output tensor.
+        """
         input_concat = torch.cat((input_label, test_image.detach()), dim=1)
         if use_pool:
             fake_query = self.fake_pool.query(input_concat)
@@ -150,6 +202,19 @@ class Pix2PixHDModel(BaseModel):
             return self.netD.forward(input_concat)
 
     def forward(self, label, inst, image, feat, infer=False):
+        """
+        Forward pass of the pix2pixHD model.
+
+        Args:
+            label (torch.Tensor): The input label tensor.
+            inst (torch.Tensor): The input instance tensor.
+            image (torch.Tensor): The input image tensor.
+            feat (torch.Tensor): The input feature tensor.
+            infer (bool, optional): Whether to perform inference or not. Defaults to False.
+
+        Returns:
+            list: A list containing the computed losses and the generated fake image (if infer is True).
+        """
         # Encode Inputs
         input_label, inst_map, real_image, feat_map = self.encode_input(label, inst, image, feat)
         # Fake Generation
@@ -193,6 +258,17 @@ class Pix2PixHDModel(BaseModel):
         return [ self.loss_filter( loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake ), None if not infer else fake_image ]
 
     def inference(self, label, inst, image=None):
+        """
+        Generate a fake image based on the given label and instance map.
+
+        Args:
+            label (Variable): The label input.
+            inst (Variable): The instance input.
+            image (Variable, optional): The image input. Defaults to None.
+
+        Returns:
+            fake_image (Variable): The generated fake image.
+        """
         # Encode Inputs
         image = Variable(image) if image is not None else None
         input_label, inst_map, real_image, _ = self.encode_input(Variable(label), Variable(inst), image, infer=True)
@@ -217,6 +293,16 @@ class Pix2PixHDModel(BaseModel):
         return fake_image
 
     def sample_features(self, inst):
+        """
+        Samples features from precomputed feature clusters based on the given instance map.
+
+        Args:
+            inst (torch.Tensor): Instance map tensor.
+
+        Returns:
+            torch.Tensor: Feature map tensor with sampled features.
+
+        """
         # read precomputed feature clusters
         cluster_path = os.path.join(self.opt.checkpoints_dir, self.opt.name, self.opt.cluster_path)
         features_clustered = np.load(cluster_path, encoding='latin1').item()
@@ -238,6 +324,18 @@ class Pix2PixHDModel(BaseModel):
         return feat_map
 
     def encode_features(self, image, inst):
+        """
+        Encodes the features of an image based on the given instance map.
+
+        Args:
+            image (torch.Tensor): The input image tensor.
+            inst (torch.Tensor): The instance map tensor.
+
+        Returns:
+            dict: A dictionary containing the encoded features for each label in the instance map.
+                  The keys of the dictionary are the labels, and the values are numpy arrays
+                  representing the encoded features for each label.
+        """
         image = Variable(image.cuda(), volatile=True)
         feat_num = self.opt.feat_num
         h, w = inst.size()[2], inst.size()[3]
@@ -260,6 +358,16 @@ class Pix2PixHDModel(BaseModel):
         return feature
 
     def get_edges(self, t):
+        """
+        Compute the edges of the input tensor.
+
+        Args:
+            t (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Tensor representing the edges of the input tensor.
+
+        """
         edge = torch.cuda.ByteTensor(t.size()).zero_()
         edge[:,:,:,1:] = edge[:,:,:,1:] | (t[:,:,:,1:] != t[:,:,:,:-1])
         edge[:,:,:,:-1] = edge[:,:,:,:-1] | (t[:,:,:,1:] != t[:,:,:,:-1])
@@ -271,13 +379,33 @@ class Pix2PixHDModel(BaseModel):
             return edge.float()
 
     def save(self, which_epoch):
+        """
+        Save the trained models to disk.
+
+        Args:
+            which_epoch (int): The epoch number of the saved models.
+
+        Returns:
+            None
+        """
         self.save_network(self.netG, 'G', which_epoch, self.gpu_ids)
         self.save_network(self.netD, 'D', which_epoch, self.gpu_ids)
         if self.gen_features:
             self.save_network(self.netE, 'E', which_epoch, self.gpu_ids)
 
     def update_fixed_params(self):
-        # after fixing the global generator for a number of iterations, also start finetuning it
+        """
+        Update the fixed parameters of the model.
+
+        This method updates the fixed parameters of the model by fixing the global generator for a number of iterations
+        and then starting to finetune it.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         params = list(self.netG.parameters())
         if self.gen_features:
             params += list(self.netE.parameters())
@@ -286,6 +414,15 @@ class Pix2PixHDModel(BaseModel):
             print('------------ Now also finetuning global generator -----------')
 
     def update_learning_rate(self):
+        """
+        Update the learning rate for the optimizer.
+
+        This method updates the learning rate for both the discriminator and generator optimizers
+        based on the current learning rate, number of decay iterations, and the decay rate.
+
+        Returns:
+            None
+        """
         lrd = self.opt.lr / self.opt.niter_decay
         lr = self.old_lr - lrd
         for param_group in self.optimizer_D.param_groups:
@@ -297,6 +434,21 @@ class Pix2PixHDModel(BaseModel):
         self.old_lr = lr
 
 class InferenceModel(Pix2PixHDModel):
+    """
+    A class representing the inference model for Pix2PixHD.
+    
+    This class extends the Pix2PixHDModel class and provides a forward method for performing inference.
+    """
+
     def forward(self, inp):
+        """
+        Perform forward pass for the inference model.
+        
+        Args:
+            inp (tuple): A tuple containing the label and instance inputs.
+        
+        Returns:
+            tensor: The output of the inference model.
+        """
         label, inst = inp
         return self.inference(label, inst)

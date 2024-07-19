@@ -5,12 +5,22 @@ from torch.autograd import Variable
 import numpy as np
 import sys
 
+from torchvision import models
 
 ###############################################################################
 # Functions
 ###############################################################################
 
 def weights_init(m):
+    """
+    Initialize the weights of the given module.
+
+    Args:
+        m (nn.Module): The module to initialize the weights for.
+
+    Returns:
+        None
+    """
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
         m.weight.data.normal_(0.0, 0.02)
@@ -19,6 +29,18 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 def get_norm_layer(norm_type='instance'):
+    """
+    Returns the normalization layer based on the given norm_type.
+
+    Parameters:
+    norm_type (str): The type of normalization layer to be used. Options are 'batch' and 'instance'.
+
+    Returns:
+    norm_layer (function): The normalization layer function based on the norm_type.
+
+    Raises:
+    NotImplementedError: If the given norm_type is not supported.
+    """
     if norm_type == 'batch':
         norm_layer = functools.partial(nn.BatchNorm2d, affine=True)
     elif norm_type == 'instance':
@@ -29,6 +51,29 @@ def get_norm_layer(norm_type='instance'):
 
 def define_G(input_nc, output_nc, ngf, netG, n_downsample_global=3, n_blocks_global=9, n_local_enhancers=1,
              n_blocks_local=3, use_dropout=False, norm='instance', gpu_ids=[]):
+    """
+    Defines the generator network for the pix2pixHD model.
+
+    Args:
+        input_nc (int): Number of input channels.
+        output_nc (int): Number of output channels.
+        ngf (int): Number of generator filters in the first conv layer.
+        netG (str): Type of generator network. Can be 'global', 'local', or 'encoder'.
+        n_downsample_global (int): Number of downsampling layers in the global generator.
+        n_blocks_global (int): Number of residual blocks in the global generator.
+        n_local_enhancers (int): Number of local enhancers in the local generator.
+        n_blocks_local (int): Number of residual blocks in each local enhancer.
+        use_dropout (bool): Whether to use dropout layers in the generator.
+        norm (str): Type of normalization layer. Can be 'instance' or 'batch'.
+        gpu_ids (list): List of GPU IDs to use.
+
+    Returns:
+        torch.nn.Module: The generator network.
+
+    Raises:
+        Exception: If the specified generator network is not implemented.
+    """
+
     norm_layer = get_norm_layer(norm_type=norm)
     if netG == 'global':
         netG = GlobalGenerator(input_nc, output_nc, ngf, n_downsample_global, n_blocks_global, use_dropout, norm_layer)
@@ -38,7 +83,7 @@ def define_G(input_nc, output_nc, ngf, netG, n_downsample_global=3, n_blocks_glo
     elif netG == 'encoder':
         netG = Encoder(input_nc, output_nc, ngf, n_downsample_global, norm_layer)
     else:
-        raise('generator not implemented!')
+        raise Exception('Generator not implemented!')
     print(netG)
     if len(gpu_ids) > 0:
         assert(torch.cuda.is_available())
@@ -47,6 +92,22 @@ def define_G(input_nc, output_nc, ngf, netG, n_downsample_global=3, n_blocks_glo
     return netG
 
 def define_D(input_nc, ndf, n_layers_D, norm='instance', use_sigmoid=False, num_D=1, getIntermFeat=False, gpu_ids=[]):
+    """
+    Define the discriminator network.
+
+    Args:
+        input_nc (int): Number of input channels.
+        ndf (int): Number of discriminator filters in the first convolutional layer.
+        n_layers_D (int): Number of layers in the discriminator.
+        norm (str, optional): Type of normalization layer. Defaults to 'instance'.
+        use_sigmoid (bool, optional): Whether to use a sigmoid activation function. Defaults to False.
+        num_D (int, optional): Number of discriminators to use. Defaults to 1.
+        getIntermFeat (bool, optional): Whether to return intermediate features. Defaults to False.
+        gpu_ids (list, optional): List of GPU IDs to use. Defaults to [].
+
+    Returns:
+        torch.nn.Module: Discriminator network.
+    """
     norm_layer = get_norm_layer(norm_type=norm)
     netD = MultiscaleDiscriminator(input_nc, ndf, n_layers_D, norm_layer, use_sigmoid, num_D, getIntermFeat)
     print(netD)
@@ -69,6 +130,29 @@ def print_network(net):
 # Losses
 ##############################################################################
 class GANLoss(nn.Module):
+    """
+    GANLoss is a class that defines the adversarial loss for a GAN (Generative Adversarial Network).
+
+    Args:
+        use_lsgan (bool): Whether to use least squares GAN loss (MSE loss) or binary cross-entropy GAN loss (BCE loss).
+        target_real_label (float): The target label value for real samples.
+        target_fake_label (float): The target label value for fake samples.
+        tensor (torch.Tensor): The tensor type to use for creating label tensors.
+
+    Attributes:
+        real_label (float): The target label value for real samples.
+        fake_label (float): The target label value for fake samples.
+        real_label_var (torch.Tensor): The variable storing the real label tensor.
+        fake_label_var (torch.Tensor): The variable storing the fake label tensor.
+        Tensor (torch.Tensor): The tensor type to use for creating label tensors.
+        loss (nn.Module): The loss function to use for calculating the GAN loss.
+
+    Methods:
+        get_target_tensor(input, target_is_real): Returns the target tensor based on the input and target_is_real flag.
+        __call__(input, target_is_real): Computes the GAN loss given the input and target_is_real flag.
+
+    """
+
     def __init__(self, use_lsgan=True, target_real_label=1.0, target_fake_label=0.0,
                  tensor=torch.FloatTensor):
         super(GANLoss, self).__init__()
@@ -83,6 +167,17 @@ class GANLoss(nn.Module):
             self.loss = nn.BCELoss()
 
     def get_target_tensor(self, input, target_is_real):
+        """
+        Returns the target tensor based on the input and target_is_real flag.
+
+        Args:
+            input (torch.Tensor): The input tensor.
+            target_is_real (bool): Whether the target is real or fake.
+
+        Returns:
+            torch.Tensor: The target tensor.
+
+        """
         target_tensor = None
         if target_is_real:
             create_label = ((self.real_label_var is None) or
@@ -101,6 +196,17 @@ class GANLoss(nn.Module):
         return target_tensor
 
     def __call__(self, input, target_is_real):
+        """
+        Computes the GAN loss given the input and target_is_real flag.
+
+        Args:
+            input (torch.Tensor): The input tensor.
+            target_is_real (bool): Whether the target is real or fake.
+
+        Returns:
+            torch.Tensor: The computed GAN loss.
+
+        """
         if isinstance(input[0], list):
             loss = 0
             for input_i in input:
@@ -113,6 +219,19 @@ class GANLoss(nn.Module):
             return self.loss(input[-1], target_tensor)
 
 class VGGLoss(nn.Module):
+    """
+    Calculates the VGG loss between two input tensors.
+
+    Args:
+        gpu_ids (list): List of GPU IDs to use for computation.
+
+    Attributes:
+        vgg (Vgg19): VGG19 model used for feature extraction.
+        criterion (nn.L1Loss): L1 loss criterion used for pixel-wise comparison.
+        weights (list): List of weights for each VGG feature map.
+
+    """
+
     def __init__(self, gpu_ids):
         super(VGGLoss, self).__init__()
         self.vgg = Vgg19().cuda()
@@ -120,6 +239,17 @@ class VGGLoss(nn.Module):
         self.weights = [1.0/32, 1.0/16, 1.0/8, 1.0/4, 1.0]
 
     def forward(self, x, y):
+        """
+        Calculates the VGG loss between two input tensors.
+
+        Args:
+            x (torch.Tensor): Input tensor x.
+            y (torch.Tensor): Input tensor y.
+
+        Returns:
+            torch.Tensor: VGG loss between x and y.
+
+        """
         x_vgg, y_vgg = self.vgg(x), self.vgg(y)
         loss = 0
         for i in range(len(x_vgg)):
@@ -130,6 +260,26 @@ class VGGLoss(nn.Module):
 # Generator
 ##############################################################################
 class LocalEnhancer(nn.Module):
+    """
+    LocalEnhancer module that combines a global generator model with local enhancer layers.
+
+    Args:
+        input_nc (int): Number of input channels.
+        output_nc (int): Number of output channels.
+        ngf (int): Number of filters in the generator.
+        n_downsample_global (int): Number of downsampling layers in the global generator.
+        n_blocks_global (int): Number of residual blocks in the global generator.
+        n_local_enhancers (int): Number of local enhancer layers.
+        n_blocks_local (int): Number of residual blocks in each local enhancer layer.
+        use_dropout (bool): Whether to use dropout layers.
+        norm_layer (nn.Module): Normalization layer to use.
+        padding_type (str): Type of padding to use.
+
+    Returns:
+        torch.Tensor: Output tensor.
+
+    """
+
     def __init__(self, input_nc, output_nc, ngf=32, n_downsample_global=3, n_blocks_global=9,
                  n_local_enhancers=1, n_blocks_local=3, use_dropout=False, norm_layer=nn.BatchNorm2d, padding_type='reflect'):
         super(LocalEnhancer, self).__init__()
@@ -168,6 +318,16 @@ class LocalEnhancer(nn.Module):
         self.downsample = nn.AvgPool2d(3, stride=2, padding=[1, 1], count_include_pad=False)
 
     def forward(self, input):
+        """
+        Forward pass of the LocalEnhancer module.
+
+        Args:
+            input (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+
+        """
         ### create input pyramid
         input_downsampled = [input]
         for i in range(self.n_local_enhancers):
@@ -184,6 +344,24 @@ class LocalEnhancer(nn.Module):
         return output_prev
 
 class GlobalGenerator(nn.Module):
+    """
+    Global Generator network for pix2pixHD model.
+
+    Args:
+        input_nc (int): Number of input channels.
+        output_nc (int): Number of output channels.
+        ngf (int): Number of filters in the generator's first conv layer. Default is 64.
+        n_downsampling (int): Number of downsampling layers. Default is 3.
+        n_blocks (int): Number of residual blocks in the generator. Default is 9.
+        use_dropout (bool): Whether to use dropout layers. Default is True.
+        norm_layer (nn.Module): Normalization layer to use. Default is nn.BatchNorm2d.
+        padding_type (str): Type of padding. Default is 'reflect'.
+
+    Attributes:
+        model (nn.Sequential): Sequential model representing the generator network.
+
+    """
+
     def __init__(self, input_nc, output_nc, ngf=64, n_downsampling=3, n_blocks=9, use_dropout=True, norm_layer=nn.BatchNorm2d,
                  padding_type='reflect'):
         assert(n_blocks >= 0)
@@ -211,16 +389,53 @@ class GlobalGenerator(nn.Module):
         self.model = nn.Sequential(*model)
 
     def forward(self, input):
+        """
+        Forward pass of the Global Generator network.
+
+        Args:
+            input (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+
+        """
         return self.model(input)
 
-# Define a resnet block
 class ResnetBlock(nn.Module):
-    def __init__(self, dim, padding_type, norm_layer,use_dropout=False, activation=nn.ReLU(True),
-                 ):
+    """
+    Residual block implementation for the ResNet architecture.
+
+    Args:
+        dim (int): Number of input and output channels.
+        padding_type (str): Type of padding to be applied. Options are 'reflect', 'replicate', or 'zero'.
+        norm_layer (nn.Module): Normalization layer to be used.
+        use_dropout (bool): Whether to use dropout or not. Default is False.
+        activation (nn.Module): Activation function to be used. Default is nn.ReLU(True).
+
+    Returns:
+        torch.Tensor: Output tensor of the residual block.
+
+    """
+
+    def __init__(self, dim, padding_type, norm_layer, use_dropout=False, activation=nn.ReLU(True)):
         super(ResnetBlock, self).__init__()
         self.conv_block = self.build_conv_block(dim, padding_type, norm_layer, activation, use_dropout)
 
     def build_conv_block(self, dim, padding_type, norm_layer, activation, use_dropout):
+        """
+        Build the convolutional block for the residual block.
+
+        Args:
+            dim (int): Number of input and output channels.
+            padding_type (str): Type of padding to be applied. Options are 'reflect', 'replicate', or 'zero'.
+            norm_layer (nn.Module): Normalization layer to be used.
+            activation (nn.Module): Activation function to be used.
+            use_dropout (bool): Whether to use dropout or not.
+
+        Returns:
+            nn.Sequential: Sequential module containing the convolutional block.
+
+        """
         conv_block = []
         p = 0
         if padding_type == 'reflect':
@@ -235,11 +450,9 @@ class ResnetBlock(nn.Module):
         conv_block += [nn.Conv2d(dim, dim, kernel_size=3, padding=p),
                        norm_layer(dim),
                        activation]
-        # Variational Inf
+
         if use_dropout:
             conv_block += [nn.Dropout(0.2)]
-
-        # Regular Inf
         else:
             conv_block += [nn.Dropout(0)]
 
@@ -258,10 +471,36 @@ class ResnetBlock(nn.Module):
         return nn.Sequential(*conv_block)
 
     def forward(self, x):
+        """
+        Forward pass of the residual block.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor of the residual block.
+
+        """
         out = x + self.conv_block(x)
         return out
 
 class Encoder(nn.Module):
+    """
+    Encoder network for pix2pixHD model.
+
+    Args:
+        input_nc (int): Number of input channels.
+        output_nc (int): Number of output channels.
+        ngf (int): Number of filters in the first layer. Default is 32.
+        n_downsampling (int): Number of downsampling layers. Default is 4.
+        norm_layer (nn.Module): Normalization layer. Default is nn.BatchNorm2d.
+
+    Attributes:
+        output_nc (int): Number of output channels.
+        model (nn.Sequential): Sequential model containing the encoder layers.
+
+    """
+
     def __init__(self, input_nc, output_nc, ngf=32, n_downsampling=4, norm_layer=nn.BatchNorm2d):
         super(Encoder, self).__init__()
         self.output_nc = output_nc
@@ -284,6 +523,17 @@ class Encoder(nn.Module):
         self.model = nn.Sequential(*model)
 
     def forward(self, input, inst):
+        """
+        Forward pass of the encoder network.
+
+        Args:
+            input (torch.Tensor): Input tensor of shape (batch_size, input_nc, H, W).
+            inst (torch.Tensor): Instance tensor of shape (batch_size, H, W).
+
+        Returns:
+            torch.Tensor: Output tensor of shape (batch_size, output_nc, H, W).
+
+        """
         outputs = self.model(input)
 
         # instance-wise average pooling
@@ -299,8 +549,24 @@ class Encoder(nn.Module):
         return outputs_mean
 
 class MultiscaleDiscriminator(nn.Module):
+    """
+    Multiscale Discriminator network for image-to-image translation.
+    """
+
     def __init__(self, input_nc, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d,
                  use_sigmoid=False, num_D=3, getIntermFeat=False):
+        """
+        Initialize the MultiscaleDiscriminator.
+
+        Args:
+            input_nc (int): Number of input channels.
+            ndf (int): Number of discriminator filters in the first convolutional layer.
+            n_layers (int): Number of layers in each discriminator.
+            norm_layer (nn.Module): Normalization layer.
+            use_sigmoid (bool): Whether to use a sigmoid activation function.
+            num_D (int): Number of discriminators to use.
+            getIntermFeat (bool): Whether to get intermediate features from each discriminator.
+        """
         super(MultiscaleDiscriminator, self).__init__()
         self.num_D = num_D
         self.n_layers = n_layers
@@ -317,6 +583,16 @@ class MultiscaleDiscriminator(nn.Module):
         self.downsample = nn.AvgPool2d(3, stride=2, padding=[1, 1], count_include_pad=False)
 
     def singleD_forward(self, model, input):
+        """
+        Forward pass through a single discriminator.
+
+        Args:
+            model (nn.Module): Discriminator model.
+            input (torch.Tensor): Input tensor.
+
+        Returns:
+            list: List of intermediate features if `getIntermFeat` is True, otherwise a list with a single element.
+        """
         if self.getIntermFeat:
             result = [input]
             for i in range(len(model)):
@@ -326,6 +602,15 @@ class MultiscaleDiscriminator(nn.Module):
             return [model(input)]
 
     def forward(self, input):
+        """
+        Forward pass through the multiscale discriminator.
+
+        Args:
+            input (torch.Tensor): Input tensor.
+
+        Returns:
+            list: List of discriminator outputs at different scales.
+        """
         num_D = self.num_D
         result = []
         input_downsampled = input
@@ -339,8 +624,19 @@ class MultiscaleDiscriminator(nn.Module):
                 input_downsampled = self.downsample(input_downsampled)
         return result
 
-# Defines the PatchGAN discriminator with the specified arguments.
 class NLayerDiscriminator(nn.Module):
+    """
+    A class representing the N-Layer PatchGANDiscriminator network.
+
+    Args:
+        input_nc (int): Number of input channels.
+        ndf (int, optional): Number of discriminator filters in the first layer. Default is 64.
+        n_layers (int, optional): Number of layers in the discriminator. Default is 3.
+        norm_layer (nn.Module, optional): Normalization layer. Default is nn.BatchNorm2d.
+        use_sigmoid (bool, optional): Whether to use a sigmoid activation function. Default is False.
+        getIntermFeat (bool, optional): Whether to return intermediate features. Default is False.
+    """
+
     def __init__(self, input_nc, ndf=64, n_layers=3, norm_layer=nn.BatchNorm2d, use_sigmoid=False, getIntermFeat=False):
         super(NLayerDiscriminator, self).__init__()
         self.getIntermFeat = getIntermFeat
@@ -382,6 +678,15 @@ class NLayerDiscriminator(nn.Module):
             self.model = nn.Sequential(*sequence_stream)
 
     def forward(self, input):
+        """
+        Forward pass of the discriminator network.
+
+        Args:
+            input (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+        """
         if self.getIntermFeat:
             res = [input]
             for n in range(self.n_layers+2):
@@ -391,9 +696,23 @@ class NLayerDiscriminator(nn.Module):
         else:
             return self.model(input)
 
-from torchvision import models
 
 class Vgg19(torch.nn.Module):
+    """
+    Vgg19 model for feature extraction.
+
+    Args:
+        requires_grad (bool): Whether to require gradients for the model parameters. Default is False.
+
+    Attributes:
+        slice1 (torch.nn.Sequential): Sequential module for the first slice of Vgg19.
+        slice2 (torch.nn.Sequential): Sequential module for the second slice of Vgg19.
+        slice3 (torch.nn.Sequential): Sequential module for the third slice of Vgg19.
+        slice4 (torch.nn.Sequential): Sequential module for the fourth slice of Vgg19.
+        slice5 (torch.nn.Sequential): Sequential module for the fifth slice of Vgg19.
+
+    """
+
     def __init__(self, requires_grad=False):
         super(Vgg19, self).__init__()
         vgg_pretrained_features = models.vgg19(pretrained=True).features
@@ -417,6 +736,16 @@ class Vgg19(torch.nn.Module):
                 param.requires_grad = False
 
     def forward(self, X):
+        """
+        Forward pass of the Vgg19 model.
+
+        Args:
+            X (torch.Tensor): Input tensor.
+
+        Returns:
+            list: List of feature maps extracted at different layers of Vgg19.
+
+        """
         h_relu1 = self.slice1(X)
         h_relu2 = self.slice2(h_relu1)
         h_relu3 = self.slice3(h_relu2)
