@@ -1,4 +1,4 @@
-name: pix2pixHD
+name: 04_image_translation_phd
 channels:
   - pytorch
   - anaconda
@@ -140,5 +140,7 @@ dependencies:
     - apex
     - zarr
     - cellpose
-prefix: ./pix2pixHD
+    - nbconvert
+    - nbformat
+prefix: ./04_image_translation_phd
 
