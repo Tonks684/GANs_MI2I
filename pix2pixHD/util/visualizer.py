@@ -7,13 +7,34 @@ from . import html
 import scipy.misc
 from PIL import Image
 import matplotlib.pyplot as plt
-
-try:
-    from StringIO import StringIO  # Python 2.7
-except ImportError:
-    from io import BytesIO         # Python 3.x
+from io import BytesIO 
 
 class Visualizer():
+    """
+    A class for visualizing and saving images during training.
+
+    Args:
+        opt (object): An object containing options for visualization.
+
+    Attributes:
+        tf_log (bool): Whether to log images using TensorFlow.
+        use_html (bool): Whether to save images to an HTML file.
+        win_size (int): The size of the display window.
+        name (str): The name of the experiment.
+        tf (module): The TensorFlow module.
+        log_dir (str): The directory for saving TensorFlow logs.
+        writer (SummaryWriter): The TensorFlow summary writer.
+        web_dir (str): The directory for saving HTML files.
+        img_dir (str): The directory for saving images.
+        log_name (str): The path to the loss log file.
+
+    Methods:
+        display_current_results: Displays and saves the current results.
+        plot_current_errors: Plots and logs the current errors.
+        print_current_errors: Prints the current errors.
+        results_plot: Plots and saves the qualitative virtual stain results.
+        save_images: Saves images to the disk.
+    """
     def __init__(self, opt):
         # self.opt = opt
         self.tf_log = opt.tf_log
@@ -36,8 +57,18 @@ class Visualizer():
             now = time.strftime('%c')
             log_file.write('================ Training Loss (%s) ================\n' % now)
 
-    # |visuals|: dictionary of images to display or save
     def display_current_results(self, visuals, epoch, step):
+        """
+        Displays and saves the current results.
+
+        Args:
+            visuals (dict): A dictionary of images to display or save.
+            epoch (int): The current epoch.
+            step (int): The current step.
+
+        Returns:
+            None
+        """
         if self.tf_log: # show images in tensorboard output
             img_summaries = []
             for label, image_numpy in visuals.items():
@@ -97,15 +128,36 @@ class Visualizer():
                     webpage.add_images(ims[num:], txts[num:], links[num:], width=self.win_size)
             webpage.save()
 
-    # errors: dictionary of error labels and values
     def plot_current_errors(self, errors, step):
+        """
+        Plots and logs the current errors.
+
+        Args:
+            errors (dict): A dictionary of error labels and values.
+            step (int): The current step.
+
+        Returns:
+            None
+        """
         if self.tf_log:
             for tag, value in errors.items():
                 summary = self.tf.Summary(value=[self.tf.Summary.Value(tag=tag, simple_value=value)])
                 self.writer.add_summary(summary, step)
 
-    # errors: same format as |errors| of plotCurrentErrors
     def print_current_errors(self, epoch, i, errors, t):
+        """
+        Prints the current errors.
+
+        Args:
+            epoch (int): The current epoch.
+            i (int): The current iteration.
+            errors (dict): A dictionary of error labels and values.
+            t (float): The time taken for the current iteration.
+
+        Returns:
+            None
+        """
+        
         message = '(epoch: %d, iters: %d, time: %.3f) ' % (epoch, i, t)
         for k, v in errors.items():
             if v != 0:
@@ -116,6 +168,22 @@ class Visualizer():
             log_file.write('%s\n' % message)
 
     def results_plot(self,input_x,target,predictions,titles,writer,epoch,rows):
+        """
+        Plots and saves the qualitative virtual stain results.
+
+        Args:
+            input_x (ndarray): The input images.
+            target (ndarray): The target images.
+            predictions (ndarray): The predicted images.
+            titles (list): The titles for each column in the plot.
+            writer (SummaryWriter): The TensorFlow summary writer.
+            epoch (int): The current epoch.
+            rows (int): The number of rows in the plot.
+
+        Returns:
+            None
+        """
+
         fig, axs = plt.subplots(input_x.shape[0], 3, figsize=(10, 30))
 
         # Set the titles for each column
@@ -143,8 +211,18 @@ class Visualizer():
         # Add the plot to TensorBoard
         writer.add_figure("Qualitative Virtual Stain Results", fig,global_step=epoch)
 
-    # save image to the disk
     def save_images(self, webpage, visuals, image_path):
+        """
+        Saves images to the disk.
+
+        Args:
+            webpage (HTML): The HTML object for saving images.
+            visuals (dict): A dictionary of images to save.
+            image_path (str): The path to the image.
+
+        Returns:
+            None
+        """
         image_dir = webpage.get_image_dir()
         short_path = ntpath.basename(image_path[0])
         name = os.path.splitext(short_path)[0]

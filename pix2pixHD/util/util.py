@@ -9,13 +9,25 @@ from tifffile import imsave
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
 
-def tensors2ims(image_tensors, imtype=np.uint16,normalize=True,stack_predictions=False):
+def tensors2ims(image_tensors, imtype=np.uint16, normalize=True, stack_predictions=False):
+    """
+    Convert image tensors to numpy arrays.
+
+    Args:
+        image_tensors (torch.Tensor): Input image tensors.
+        imtype (numpy.dtype, optional): Data type of the output numpy array. Defaults to np.uint16.
+        normalize (bool, optional): Whether to normalize the output numpy array. Defaults to True.
+        stack_predictions (bool, optional): Whether to stack predictions. Defaults to False.
+
+    Returns:
+        numpy.ndarray: Converted image numpy array.
+    """
     image_tensors = image_tensors.cpu().detach().numpy()
     if imtype == np.uint16:
         if normalize:
             image_numpy = (np.array(image_tensors) + 1) / 2.0 * 65535.0
         else:
-            image_numpy =np.array (image_numpy) * 65535.0
+            image_numpy = np.array(image_numpy) * 65535.0
         image_numpy = np.clip(image_numpy, 0, 65535)
     elif imtype == np.uint8:
         if normalize:
@@ -33,14 +45,27 @@ def tensors2ims(image_tensors, imtype=np.uint16,normalize=True,stack_predictions
 
 
 
-def tensor2im(image_tensor, imtype=np.uint16,normalize=True,stack_predictions=False):
+def tensor2im(image_tensor, imtype=np.float32, normalize=True, stack_predictions=False):
+    """
+    Convert a PyTorch tensor to a numpy array image.
+
+    Args:
+        image_tensor (torch.Tensor or list): The input image tensor or a list of image tensors.
+        imtype (numpy.dtype, optional): The desired numpy array data type. Defaults to np.float32.
+        normalize (bool, optional): Whether to normalize the image tensor. Defaults to True.
+        stack_predictions (bool, optional): Whether to stack multiple image tensors. Defaults to False.
+
+    Returns:
+        numpy.ndarray or list: The converted numpy array image or a list of converted numpy array images.
+    """
     if isinstance(image_tensor, list):
         image_numpy = []
         for i in range(len(image_tensor)):
             image_numpy.append(tensor2im(image_tensor[i], imtype, normalize))
         return image_numpy
+
     image_numpy = image_tensor.detach().cpu().float().numpy()
-    
+
     if imtype == np.uint16:
         if normalize:
             image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 65535.0
@@ -58,14 +83,26 @@ def tensor2im(image_tensor, imtype=np.uint16,normalize=True,stack_predictions=Fa
             image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0
         else:
             image_numpy = np.transpose(image_numpy, (1, 2, 0))
-#             image_numpy = np.clip(image_numpy, 0, 1)
-        
-
 
     return image_numpy.astype(imtype)
 
 # Converts a one-hot tensor into a colorful label map
 def tensor2label(label_tensor, n_label, imtype=np.uint16):
+    """
+    Convert a label tensor to a label image.
+
+    Args:
+        label_tensor (torch.Tensor): The label tensor to be converted.
+        n_label (int): The number of labels.
+        imtype (numpy.dtype, optional): The desired data type of the label image. Defaults to np.uint16.
+
+    Returns:
+        numpy.ndarray: The label image as a numpy array.
+
+    Note:
+        If `n_label` is 0, the function will call `tensor2im` to convert the tensor to an image.
+
+    """
     if n_label == 0:
         return tensor2im(label_tensor, imtype)
     label_tensor = label_tensor.cpu().float()

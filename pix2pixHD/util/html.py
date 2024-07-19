@@ -4,6 +4,29 @@ import os
 
 
 class HTML:
+    """
+    A class for generating HTML documents with images and tables.
+
+    Args:
+        web_dir (str): The directory where the HTML files will be saved.
+        title (str): The title of the HTML document.
+        refresh (int, optional): The refresh rate of the HTML document in seconds. Defaults to 0.
+
+    Attributes:
+        title (str): The title of the HTML document.
+        web_dir (str): The directory where the HTML files will be saved.
+        img_dir (str): The directory where the images will be saved.
+        doc (dominate.document): The HTML document object.
+        t (dominate.tags.table): The HTML table object.
+
+    Methods:
+        get_image_dir(): Returns the image directory.
+        add_header(str): Adds a header to the HTML document.
+        add_table(border=1): Adds a table to the HTML document.
+        add_images(ims, txts, links, width=512): Adds images with captions and links to the HTML document.
+        save(): Saves the HTML document to a file.
+    """
+
     def __init__(self, web_dir, title, refresh=0):
         self.title = title
         self.web_dir = web_dir
