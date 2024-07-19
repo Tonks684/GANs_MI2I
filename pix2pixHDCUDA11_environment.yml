@@ -140,5 +140,7 @@ dependencies:
     - apex
     - zarr
     - cellpose
+    - nbconvert
+    - nbformat
 prefix: ./pix2pixHD
 
