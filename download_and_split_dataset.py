@@ -139,6 +139,7 @@ if __name__ == "__main__":
             print(f"Failed to access remote dataset: {e}")
 
     create_train_val_split(f'{args.output_image_folder}/input',f'{args.output_image_folder}/nuclei',f'{args.output_image_folder}/cyto')
+
     # Extract test set
     for a549_hoechst_folder in tqdm([0,5,10,15,20,25,30]):
         test_dataset_url = \
@@ -157,5 +158,10 @@ if __name__ == "__main__":
                 cyto = dataset_np[0,2,img]
                 cyto_crops = crop_image(cyto,'cyto/test/',args.crop_size)
                 save_crops(cyto_crops, a549_hoechst_folder, img, args)
+                nuclei_masks = dataset_np[0,3,img]
+                nuclei_crops = crop_image(nuclei_masks)
+                save_crops(nuclei_crops,'nuclei/test/masks/', a549_hoechst_folder, img, args)
+                
+
         except Exception as e:
             print(f"Failed to access remote dataset: {e}")

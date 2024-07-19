@@ -5,7 +5,7 @@ from pathlib import Path
 model_name = f'dlmbl_vscyto' 
 dataroot = Path('../../')
 output_dir = Path('../../results/')
-python_file = Path('../../pix2pixHD/train_tesaro.py')
+python_file = Path('../../pix2pixHD/train_dlmbl.py')
 # Path for chosen training file see source code for explanation of files to choose from.
 GAN_config = {}
 GAN_config['--dataroot'] = dataroot
@@ -22,7 +22,7 @@ GAN_config['--seed'] = '42'
 
 GAN_config['--no_vgg_loss'] = ''
 GAN_config['--nThreads'] = '1'
-# GAN_config['--gpu_ids'] = '0'
+GAN_config['--gpu_ids'] = '0'
 GAN_config['--loadSize'] = '256'
 GAN_config['--ndf'] = '32'
 GAN_config['--norm'] = 'instance'
