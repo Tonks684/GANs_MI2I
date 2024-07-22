@@ -33,7 +33,7 @@ def crop_image(image, crop_size=512):
     
     return crops
 
-def copy_files(file_list, split_type, folders):
+def move_files(file_list, split_type, folders):
     """
     Copy files from the given file list to the specified split type and folders.
 
@@ -49,7 +49,7 @@ def copy_files(file_list, split_type, folders):
         for folder_type, folder_path in folders.items():
             src = folder_path / file_name
             dst = folder_path / split_type / file_name
-            shutil.copy(src, dst)
+            shutil.move(src, dst)
 
 def create_train_val_split(input_folder, nuclei_folder, cyto_folder, split_ratio=0.8):
     """
@@ -87,9 +87,9 @@ def create_train_val_split(input_folder, nuclei_folder, cyto_folder, split_ratio
     train_files = image_files[:split_index]
     val_files = image_files[split_index:]
     
-    # Copy train and val files
-    copy_files(train_files, 'train',folders)
-    copy_files(val_files, 'val', folders)
+    # Move train and val files
+    move_files(train_files, 'train',folders)
+    move_files(val_files, 'val', folders)
 
 def save_crops(input_crops, channel_folder, a549_hoechst_folder, img, args):
     """
