@@ -123,9 +123,9 @@ if __name__ == "__main__":
         os.makedirs(f'{args.output_image_folder}/nuclei/{folder}', exist_ok=True)
         os.makedirs(f'{args.output_image_folder}/cyto/{folder}', exist_ok=True)
         os.makedirs(f'{args.output_image_folder}/input/{folder}', exist_ok=True)
-    os.makedirs(f'{args.output_image_folder}/nuclei/test/masks/', exist_ok=True)
+    os.makedirs(f'{args.output_image_folder}/nuclei/masks/', exist_ok=True)
 
-    #Extract train and validation
+    # Extract train and validation
     for a549_hoechst_folder in tqdm(range(1,30)):
         train_dataset_url = \
         f"https://public.czbiohub.org/comp.micro/viscy/VSCyto2D/training/a549_hoechst_cellmask_train_val.zarr/0/0/{a549_hoechst_folder}/0"
@@ -153,7 +153,7 @@ if __name__ == "__main__":
         test_dataset_url = \
         f"https://public.czbiohub.org/comp.micro/viscy/VSCyto2D/test/a549_hoechst_cellmask_test.zarr/0/0/{a549_hoechst_folder}/0/"
         try:
-            dataset = zarr.open(train_dataset_url, mode='r')
+            dataset = zarr.open(test_dataset_url, mode='r')
             print("Remote dataset accessed successfully.")
             dataset_np = np.array(dataset)
             for img in tqdm(range(dataset_np.shape[2])):
@@ -164,11 +164,11 @@ if __name__ == "__main__":
                 nuclei_crops = crop_image(nuclei, args.crop_size)
                 save_crops(nuclei_crops,'nuclei/test/', a549_hoechst_folder, img, args)
                 cyto = dataset_np[0,2,img]
-                cyto_crops = crop_image(cyto,'cyto/test/', args.crop_size)
-                save_crops(cyto_crops, a549_hoechst_folder, img, args)
+                cyto_crops = crop_image(cyto, args.crop_size)
+                save_crops(cyto_crops,'cyto/test/', a549_hoechst_folder, img, args)
                 nuclei_masks = dataset_np[0,3,img]
                 nuclei_crops = crop_image(nuclei_masks, args.crop_size)
-                save_crops(nuclei_crops,'nuclei/test/masks/', a549_hoechst_folder, img, args)
+                save_crops(nuclei_crops,'nuclei/masks/', a549_hoechst_folder, img, args)
                 
 
         except Exception as e:
