@@ -10,7 +10,6 @@ from torchvision import models
 ###############################################################################
 # Functions
 ###############################################################################
-
 def weights_init(m):
     """
     Initialize the weights of the given module.

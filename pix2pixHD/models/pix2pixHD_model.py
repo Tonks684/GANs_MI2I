@@ -289,7 +289,8 @@ class Pix2PixHDModel(BaseModel):
             with torch.no_grad():
                 fake_image = self.netG.forward(input_concat)
         else:
-            fake_image = self.netG.forward(input_concat)
+            with torch.no_grad():
+                fake_image = self.netG.forward(input_concat)
         return fake_image
 
     def sample_features(self, inst):

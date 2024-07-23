@@ -6,7 +6,6 @@ class BaseModel(torch.nn.Module):
     """
     Base class for all models in the project.
     """
-
     def name(self):
         """
         Get the name of the model.

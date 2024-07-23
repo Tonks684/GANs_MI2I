@@ -335,15 +335,15 @@ def gen_segmentation_scores(
         f'{results_zero_obj_removed.shape[0]} images successfully saved in '
         f'{final_scores_output}/results.csv'
     )
-    false_negatives.to_csv(final_scores_output + '/false_negatives.csv')
-    print(
-        f'{false_negatives.shape[0]} images successfully saved in '
-        f'{final_scores_output}/false_negatives.csv'
-    )
-    splits_merges.to_csv(final_scores_output + '/splits_merges.csv')
-    print(
-        f'{splits_merges.shape[0]} images successfully saved in '
-        f'{final_scores_output}/splits_merges.csv'
-    )
+    # false_negatives.to_csv(final_scores_output + '/false_negatives.csv')
+    # print(
+    #     f'{false_negatives.shape[0]} images successfully saved in '
+    #     f'{final_scores_output}/false_negatives.csv'
+    # )
+    # splits_merges.to_csv(final_scores_output + '/splits_merges.csv')
+    # print(
+    #     f'{splits_merges.shape[0]} images successfully saved in '
+    #     f'{final_scores_output}/splits_merges.csv'
+    # )
     return results_zero_obj_removed, false_negatives, splits_merges
  
