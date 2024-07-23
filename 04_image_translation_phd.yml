@@ -128,6 +128,7 @@ dependencies:
       - fastjsonschema==2.20.0
       - fastremap==1.15.0
       - fonttools==4.53.1
+      - fsspec
       - google-auth==2.32.0
       - google-auth-oauthlib==1.0.0
       - greenlet==3.0.3
