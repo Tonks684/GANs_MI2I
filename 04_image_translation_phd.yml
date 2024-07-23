@@ -148,6 +148,7 @@ dependencies:
       - jupyter-client==8.6.2
       - jupyterlab-pygments==0.3.0
       - notebook
+      - numpy=1.24.4
       - jupytext==1.16.3
       - kiwisolver==1.4.5
       - lazy-loader==0.4
