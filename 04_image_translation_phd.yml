@@ -32,6 +32,7 @@ dependencies:
   - jedi=0.19.1=py38h06a4308_0
   - jinja2=3.1.4=py38h06a4308_0
   - jpeg=9e=h7f8727e_0
+  - jupyter
   - jupyter_client=8.6.0=py38h06a4308_0
   - jupyter_core=5.7.2=py38h06a4308_0
   - lame=3.100=h7b6447c_0
