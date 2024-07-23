@@ -107,6 +107,7 @@ dependencies:
   - zstd=1.5.2=ha4553b6_0
   - pip:
       - absl-py==2.1.0
+      - aiohttp
       - anykeystore==0.2
       - apex==0.9.10.dev0
       - asciitree==0.3.3
@@ -192,6 +193,7 @@ dependencies:
       - pyzmq==26.0.3
       - referencing==0.35.1
       - repoze-sendmail==4.4.1
+      - request
       - requests-oauthlib==2.0.0
       - roifile==2023.5.12
       - rpds-py==0.19.0
