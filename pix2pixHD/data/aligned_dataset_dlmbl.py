@@ -1,5 +1,5 @@
 import os.path
-from GANs_MI2I.pix2pixHD.data.base_dataset import BaseDataset, get_params, get_transform, normalize
+from data.base_dataset import BaseDataset, get_params, get_transform, normalize
 from data.image_folder import make_dataset
 from PIL import Image
 import numpy as np
