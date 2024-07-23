@@ -101,21 +101,25 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
             visualizer.plot_current_errors(errors, total_steps) 
         ### display output images
         visuals = OrderedDict([('label',
-                                util.tensor2im(data['label'][0],imtype=np.uint16)),
+                                util.tensors2ims(data['label'],imtype=np.uint16)),
                                ('synthesized_image',
-                                util.tensor2im(generated.data[0],imtype=np.uint16)),
-                               ('real_image', util.tensor2im(data['image'][0],imtype=np.uint16))])
+                                util.tensors2ims(generated.data,imtype=np.uint16)),
+                               ('real_image', util.tensors2ims(data['image'],imtype=np.uint16))])
         if save_fake:
             visualizer.display_current_results(visuals, epoch, total_steps)
         
         # Compute metric
-        gen_image = visuals['synthesized_image'][:,:,0]
-        gt_image = visuals['real_image'][:,:,0]
-        score_ssim = ssim(gt_image, gen_image)
-        ssim_scores.append(score_ssim)
-        score_psnr = psnr(gt_image, gen_image)
-        psnr_scores.append(score_psnr)
-
+        b_ssim = []
+        b_psnr = []
+        for img in range(visuals['synthesized_image'].shape[0]):
+            gen_image = visuals['synthesized_image'][img,0]
+            gt_image = visuals['real_image'][img,0]
+            score_ssim = ssim(gt_image, gen_image)
+            b_ssim.append(score_ssim)
+            score_psnr = psnr(gt_image, gen_image)
+            b_psnr.append(score_psnr)
+        psnr_scores.append(np.mean(b_psnr))
+        ssim_scores.append(np.mean(b_ssim))
         if epoch_iter >= dataset_size:
                 break
         running_loss_G_GAN += loss_G_GAN
@@ -175,19 +179,23 @@ def val_epoch(model, dataset_val, epoch):
             running_loss_G_VGG += loss_G_VGG
             
             visuals = OrderedDict([('input_label',
-                                util.tensor2im(data['label'][0],imtype=np.uint16)),
+                                util.tensors2ims(data['label'],imtype=np.uint16)),
                                ('synthesized_image',
-                                util.tensor2im(generated.data[0],imtype=np.uint16)),
-                               ('real_image', util.tensor2im(data['image'][0],imtype=np.uint16))])
-            gen_image = visuals['synthesized_image'][:,:,0]
-            gt_image = visuals['real_image'][:,:,0]
+                                util.tensors2ims(generated.data,imtype=np.uint16)),
+                               ('real_image', util.tensors2ims(data['image'],imtype=np.uint16))])
             
-            score_ssim = ssim(gt_image, gen_image)
-            ssim_scores.append(score_ssim)
-            
-            score_psnr = psnr(gt_image, gen_image)
-            psnr_scores.append(score_psnr)
-        
+            # Compute metric
+            b_ssim = []
+            b_psnr = []
+            for img in range(visuals['synthesized_image'].shape[0]):
+                gen_image = visuals['synthesized_image'][img,0]
+                gt_image = visuals['real_image'][img,0]
+                score_ssim = ssim(gt_image, gen_image)
+                b_ssim.append(score_ssim)
+                score_psnr = psnr(gt_image, gen_image)
+                b_psnr.append(score_psnr)
+            psnr_scores.append(np.mean(b_psnr))
+            ssim_scores.append(np.mean(b_ssim))
         return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(generated.data,imtype=np.uint16), util.tensors2ims(data['image'],imtype=np.uint16), data['label']
 
 
@@ -227,7 +235,9 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG, val_ssim, val_psnr], virtual_stain, fluorescence, brightfield = val_epoch(model, dataset_val, epoch)
         
         visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Phase Contrast', 'Fluorescence', 'Virtual Stain'],writer,epoch,rows=brightfield.shape[0])
-
+        imsave(f'{opt.checkpoint_dir}/bf/epoch{epoch}.tiff',brightfield.astype(np.float32),imagej=True)
+        imsave(f'{opt.checkpoint_dir}/fluorescence/epoch{epoch}.tiff',fluorescence.astype(np.float32),imagej=True)
+        imsave(f'{opt.checkpoint_dir}/virtual_stain/epoch{epoch}.tiff',virtual_stain.astype(np.float32),imagej=True)
         # Tensorboard Logging
         epoch_discriminator = {'fake_is_fake': train_loss_D_fake, 'real_is_real': train_loss_D_real}
         writer.add_scalars('Discriminator Predicted Probability on Training Set', epoch_discriminator, epoch)
