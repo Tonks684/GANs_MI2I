@@ -22,7 +22,7 @@ class BaseOptions():
         # experiment specifics
         self.parser.add_argument('--name', type=str, default='label2city', help='name of the experiment. It decides where to store samples and models')        
         self.parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
-        self.parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='models are saved here')
+        self.parser.add_argument('--checkpoints_dir', type=str, default='./training/', help='models are saved here')
         self.parser.add_argument('--model', type=str, default='pix2pixHD', help='which model to use')
         self.parser.add_argument('--norm', type=str, default='instance', help='instance normalization or batch normalization')        
         self.parser.add_argument('--use_dropout', action='store_true', help='use dropout for the generator')
@@ -72,7 +72,7 @@ class BaseOptions():
      
 
         # for instance-wise features
-        self.parser.add_argument('--no_instance', action='store_true', help='if specified, do *not* add instance map as input')        
+        self.parser.add_argument('--no_instance', action='store_true', help='if specified, do *not* add instance map as input', default=True)        
         self.parser.add_argument('--instance_feat', action='store_true', help='if specified, add encoded instance features as input')
         self.parser.add_argument('--label_feat', action='store_true', help='if specified, add encoded label features as input')        
         self.parser.add_argument('--feat_num', type=int, default=3, help='vector length for encoded features')        
