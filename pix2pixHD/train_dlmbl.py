@@ -102,12 +102,13 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
             visualizer.print_current_errors(epoch, epoch_iter, errors, t)
             visualizer.plot_current_errors(errors, total_steps) 
         
-        virtual_stain = util.tensors2ims(opt, generated.data,imtype='dlmbl')
-        fluorescence = util.tensors2ims(opt, data['image'],imtype='dlmbl')
+        virtual_stain = util.tensors2ims(opt, generated.data, imtype='dlmbl')
+        fluorescence = util.tensors2ims(opt, data['image'], imtype='dlmbl')
         # Compute metric
         b_ssim = []
         b_psnr = []
         for i in range(opt.batchSize):
+            print(virtual_stain[i].shape)
             gen_image = virtual_stain[i]
             gen_image = np.transpose(gen_image, (1, 2, 0))
             gt_image = fluorescence[i]
