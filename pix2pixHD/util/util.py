@@ -38,9 +38,9 @@ def tensors2ims(opt, image_tensors, imtype=np.uint16, normalize=True, stack_pred
     
     elif imtype == "dlmbl":
         if opt.target == "nuclei":
-            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 1513) + 1407
+            image_numpy = (image_numpy * 1513) + 1407
         elif opt.target == "cyto":
-            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 5309) + 10274
+            image_numpy = (image_numpy * 5309) + 10274
         else:
             raise ValueError("Unknown target")
     else:

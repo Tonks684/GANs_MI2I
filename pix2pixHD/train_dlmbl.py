@@ -192,7 +192,9 @@ def val_epoch(opt, model, dataset_val, epoch):
             b_ssim = []
             b_psnr = []
             for i in range(opt.batchSize):
-                gen_image = visuals['synthesized_image'][i][:,:,0]
+                print(visuals['synthesized_image'][i].shape)
+                print(visuals['real_image'].shape)
+                gen_image = visuals['synthesized_image'][i,]
                 gt_image = visuals['real_image'][i][:,:,0]
                 score_ssim = ssim(gt_image, gen_image)
                 b_ssim.append(score_ssim)
