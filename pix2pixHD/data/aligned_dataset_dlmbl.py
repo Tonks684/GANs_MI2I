@@ -54,7 +54,7 @@ class AlignedDataset(BaseDataset):
         A = Image.open(A_path).convert('F')
        
         # Zscore normalisation
-        A = A.point(lambda p: ((p-0.0000441)/0.0577))
+        A = (A -0.0000441)/0.0577
         
         params = get_params(self.opt, A.size)
         if self.opt.label_nc == 0:
@@ -69,9 +69,9 @@ class AlignedDataset(BaseDataset):
             B_path = self.B_paths[index]
             B = Image.open(B_path).convert('F')
             if self.opt.target == 'nuclei':
-                B = B.point(lambda p: ((p-1407)/1513))
+                B = (B-1407.0)/1513.0
             elif self.opt.target == 'cyto':
-                B = B.point(lambda p: ((p-10274)/5309))
+                B = (B-10274.0)/5309.0
             else:
                 raise ValueError("Unknown target")
             transform_B = get_transform(self.opt, params)
