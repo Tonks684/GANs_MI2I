@@ -109,7 +109,9 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         b_psnr = []
         for i in range(opt.batchSize):
             gen_image = virtual_stain[i]
+            gen_image = np.transpose(gen_image, (1, 2, 0))
             gt_image = fluorescence[i]
+            gt_image = np.transpose(gt_image, (1, 2, 0))
             score_ssim = ssim(gt_image, gen_image)
             b_ssim.append(score_ssim)
             score_psnr = psnr(gt_image, gen_image)
@@ -184,8 +186,11 @@ def val_epoch(opt, model, dataset_val, epoch):
             b_ssim = []
             b_psnr = []
             for i in range(opt.batchSize):
+
                 gen_image = virtual_stain[i]
+                gen_image = np.transpose(gen_image, (1, 2, 0))
                 gt_image = fluorescence[i]
+                gt_image = np.transpose(gt_image, (1, 2, 0))
                 score_ssim = ssim(gt_image, gen_image)
                 b_ssim.append(score_ssim)
                 score_psnr = psnr(gt_image, gen_image)
