@@ -104,17 +104,12 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         
         virtual_stain = util.tensors2ims(opt, generated.data, imtype='dlmbl')
         fluorescence = util.tensors2ims(opt, data['image'], imtype='dlmbl')
-        print(virtual_stain[0].shape)
         # Compute metric
         b_ssim = []
         b_psnr = []
         for i in range(opt.batchSize):
-            print(virtual_stain[i].shape)
-            gen_image = virtual_stain[i]
-            gen_image = np.transpose(gen_image, (1, 2, 0))
-            gt_image = fluorescence[i]
-            gt_image = np.transpose(gt_image, (1, 2, 0))
-            print(gen_image.shape, gt_image.shape)
+            gen_image = virtual_stain[i][0]
+            gt_image = fluorescence[i][0]
             score_ssim = ssim(gt_image, gen_image)
             b_ssim.append(score_ssim)
             score_psnr = psnr(gt_image, gen_image)
@@ -190,10 +185,8 @@ def val_epoch(opt, model, dataset_val, epoch):
             b_psnr = []
             for i in range(opt.batchSize):
 
-                gen_image = virtual_stain[i]
-                gen_image = np.transpose(gen_image, (1, 2, 0))
-                gt_image = fluorescence[i]
-                gt_image = np.transpose(gt_image, (1, 2, 0))
+                gen_image = virtual_stain[i][0]
+                gt_image = fluorescence[i][0]
                 score_ssim = ssim(gt_image, gen_image)
                 b_ssim.append(score_ssim)
                 score_psnr = psnr(gt_image, gen_image)
