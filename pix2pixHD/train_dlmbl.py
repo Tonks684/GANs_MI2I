@@ -101,24 +101,15 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
             t = (time.time() - iter_start_time) / opt.print_freq
             visualizer.print_current_errors(epoch, epoch_iter, errors, t)
             visualizer.plot_current_errors(errors, total_steps) 
-        ### display output images
-        visuals = OrderedDict([('label',
-                                util.tensors2ims(opt, data['label'],imtype='dlmbl')),
-                               ('synthesized_image',
-                                util.tensors2ims(opt, generated.data,imtype='dlmbl')),
-                               ('real_image', util.tensors2ims(opt, data['image'],imtype='dlmbl'))])
-        if save_fake:
-            visualizer.display_current_results(visuals, epoch, total_steps)
         
+        virtual_stain = util.tensors2ims(opt, generated.data,imtype='dlmbl')
+        fluorescence = util.tensors2ims(opt, data['image'],imtype='dlmbl')
         # Compute metric
         b_ssim = []
         b_psnr = []
         for i in range(opt.batchSize):
-            print(visuals['synthesized_image'][i].shape)
-            print(visuals['real_image'].shape)
-                
-            gen_image = visuals['synthesized_image'][i][:,:,0]
-            gt_image = visuals['real_image'][i][:,:,0]
+            gen_image = virtual_stain[i]
+            gt_image = fluorescence[i]
             score_ssim = ssim(gt_image, gen_image)
             b_ssim.append(score_ssim)
             score_psnr = psnr(gt_image, gen_image)
@@ -186,19 +177,15 @@ def val_epoch(opt, model, dataset_val, epoch):
             running_loss_G_VGG += loss_G_VGG
             
             ### display output images
-            visuals = OrderedDict([('label',
-                                util.tensors2ims(opt, data['label'],imtype='dlmbl')),
-                               ('synthesized_image',
-                                util.tensors2ims(opt, generated.data,imtype='dlmbl')),
-                               ('real_image', util.tensors2ims(opt, data['image'],imtype='dlmbl'))])
+            input_data = util.tensors2ims(opt, data['label'],imtype='dlmbl')
+            virtual_stain = util.tensors2ims(opt, generated.data,imtype='dlmbl')
+            fluorescence = util.tensors2ims(opt, data['image'],imtype='dlmbl')
             # Compute metric
             b_ssim = []
             b_psnr = []
             for i in range(opt.batchSize):
-                print(visuals['synthesized_image'][i].shape)
-                print(visuals['real_image'].shape)
-                gen_image = visuals['synthesized_image'][i,]
-                gt_image = visuals['real_image'][i][:,:,0]
+                gen_image = virtual_stain[i]
+                gt_image = fluorescence[i]
                 score_ssim = ssim(gt_image, gen_image)
                 b_ssim.append(score_ssim)
                 score_psnr = psnr(gt_image, gen_image)
@@ -206,7 +193,7 @@ def val_epoch(opt, model, dataset_val, epoch):
             ssim_scores.append(np.mean(b_ssim))
             psnr_scores.append(np.mean(b_psnr))
         
-        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(opt, generated.data,imtype='dlmbl'), util.tensors2ims(opt,data['image'],imtype='dlmbl'),  util.tensors2ims(opt,data['label'],imtype='dlmbl')
+        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  virtual_stain, fluorescence,  input_data
 
 
 
