@@ -39,7 +39,11 @@ class AlignedDataset(BaseDataset):
             print('----------- loading features from %s ----------' % self.dir_feat)
             self.feat_paths = sorted(make_dataset(self.dir_feat))
         self.dataset_size = len(self.A_paths)
-
+    
+    def minmax_norm(self, img,min,max):
+        img = (img - min) / (max - min)
+        return img.astype(np.float32)
+        
     def __getitem__(self, index):
         """
         Retrieves a single item from the dataset.
@@ -52,10 +56,7 @@ class AlignedDataset(BaseDataset):
         """
         A_path = self.A_paths[index]
         A = imread(A_path)
-       
-        # Zscore normalisation
-        A = (A -0.0000441)/0.0577
-        
+        # No normalisation as already between -1 and 1
         params = get_params(self.opt, A.size)
         if self.opt.label_nc == 0:
             transform_A = get_transform(self.opt, params, normalize=False)
@@ -69,9 +70,11 @@ class AlignedDataset(BaseDataset):
             B_path = self.B_paths[index]
             B = imread(B_path)
             if self.opt.target == 'nuclei':
-                B = (B-1407.0)/1513.0
+                B = self.minmax_norm(B,8603.0,1335.0)
+                B = (B * 2) - 1
             elif self.opt.target == 'cyto':
-                B = (B-10274.0)/5309.0
+                B = self.minmax_norm(B, 18372.0, 1335.0)
+                B = (B * 2) - 1
             else:
                 raise ValueError("Unknown target")
             transform_B = get_transform(self.opt, params)
