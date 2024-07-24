@@ -5,7 +5,7 @@ from PIL import Image
 import numpy as np
 import torch
 from pathlib import Path
-
+from tifffile import imread
 class AlignedDataset(BaseDataset):
     """
     A custom dataset class for loading aligned image datasets.
@@ -51,7 +51,7 @@ class AlignedDataset(BaseDataset):
             dict: A dictionary containing the input data and paths.
         """
         A_path = self.A_paths[index]
-        A = Image.open(A_path).convert('F')
+        A = imread(A_path)
        
         # Zscore normalisation
         A = (A -0.0000441)/0.0577
@@ -67,7 +67,7 @@ class AlignedDataset(BaseDataset):
         B_tensor = inst_tensor = feat_tensor = 0
         if self.opt.isTrain or self.opt.use_encoded_image:
             B_path = self.B_paths[index]
-            B = Image.open(B_path).convert('F')
+            B = imread(B_path)
             if self.opt.target == 'nuclei':
                 B = (B-1407.0)/1513.0
             elif self.opt.target == 'cyto':
