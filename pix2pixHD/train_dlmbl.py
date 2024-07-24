@@ -142,7 +142,6 @@ def val_epoch(opt, model, dataset_val):
     model.eval()
     with torch.no_grad():
         for data in dataset_val:
-            print(data['label'].shape)
             losses, generated = model(Variable(data['label']), Variable(data['inst']),Variable(data['image']), Variable(data['feat']), infer=True)
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
