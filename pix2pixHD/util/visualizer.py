@@ -2,7 +2,7 @@ import numpy as np
 import os
 import ntpath
 import time
-from . import my_util as util
+from . import util as util
 from . import html
 import scipy.misc
 from PIL import Image
