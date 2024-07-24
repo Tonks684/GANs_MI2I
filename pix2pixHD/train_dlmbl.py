@@ -115,7 +115,7 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         running_loss_G_VGG += loss_G_VGG
     return running_loss_D_fake / dataset_size, running_loss_D_real/ dataset_size, running_loss_G_GAN / dataset_size, running_loss_G_GAN_Feat / dataset_size, running_loss_G_VGG/ dataset_size
 
-def val_epoch(opt, model, dataset_val, epoch):
+def val_epoch(opt, model, dataset_val):
     """
     Perform validation for one epoch.
 
