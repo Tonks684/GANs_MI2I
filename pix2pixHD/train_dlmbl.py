@@ -60,8 +60,6 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
     print_delta = total_steps % opt.print_freq
 
     for i, data in enumerate(dataset_train, start=epoch_iter):
-        print('----')
-        print(opt.batchSize)
         if total_steps % opt.print_freq == print_delta:
             iter_start_time = time.time()
         total_steps += opt.batchSize
@@ -106,6 +104,7 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         
         virtual_stain = util.tensors2ims(opt, generated.data, imtype='dlmbl')
         fluorescence = util.tensors2ims(opt, data['image'], imtype='dlmbl')
+        print(virtual_stain[0].shape)
         # Compute metric
         b_ssim = []
         b_psnr = []
@@ -115,6 +114,7 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
             gen_image = np.transpose(gen_image, (1, 2, 0))
             gt_image = fluorescence[i]
             gt_image = np.transpose(gt_image, (1, 2, 0))
+            print(gen_image.shape, gt_image.shape)
             score_ssim = ssim(gt_image, gen_image)
             b_ssim.append(score_ssim)
             score_psnr = psnr(gt_image, gen_image)
