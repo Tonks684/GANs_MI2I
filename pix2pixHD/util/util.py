@@ -37,7 +37,6 @@ def tensors2ims(opt, image_tensors, imtype=np.uint16, normalize=False, stack_pre
         image_numpy = np.clip(image_numpy, 0, 255)
     
     elif imtype == "dlmbl":
-        print(image_numpy.shape)
         if opt.target == "nuclei":
             image_numpy = (image_numpy * 1513) + 1407
             image_numpy.astype(np.float32)
