@@ -20,7 +20,7 @@ from tensorboardX import SummaryWriter
 def lcm(a,b): return abs(a * b)/math.gcd(a,b) if a and b else 0
 
 
-def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, display_delta):
+def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter):
     """
     Train the model for one epoch.
 
@@ -195,7 +195,7 @@ def val_epoch(opt, model, dataset_val, epoch):
 
 
 
-def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optimizer_D, start_epoch, epoch_iter, iter_path, display_delta, writer):
+def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optimizer_D, start_epoch, epoch_iter, writer):
     """
     Trains the model using the specified options and datasets.
 
@@ -209,13 +209,14 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         optimizer_D: The optimizer for the discriminator.
         start_epoch (int): The starting epoch for training.
         epoch_iter (int): The current iteration within the epoch.
-        iter_path: The path to save the current iteration.
         writer: The writer for logging training metrics.
 
     Returns:
         None - but training outputs are saved to Tensorboard
     """
     total_steps = (start_epoch-1) * (len(dataset_train)+len(dataset_val)) + epoch_iter 
+    iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
+
     for epoch in range(start_epoch, opt.n_epochs):
         epoch_start_time = time.time()
         if epoch == start_epoch:
@@ -224,7 +225,7 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         else:
             epoch_iter = epoch_iter % len(dataset_train)
 
-        train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, mean_ssim, mean_psnr = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, iter_path, display_delta)
+        train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, mean_ssim, mean_psnr = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter, iter_path)
         
         [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG, val_ssim, val_psnr], virtual_stain, fluorescence, brightfield = val_epoch(model, dataset_val, epoch)
         
