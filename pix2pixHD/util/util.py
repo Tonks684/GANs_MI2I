@@ -8,7 +8,9 @@ import os
 from tifffile import imsave
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
-
+def undominmax_norm(img,min,max):
+    img = (img * (max - min)) + min
+    return img.astype(np.float32)
 def tensors2ims(opt, image_tensors, imtype=np.uint16, normalize=False, stack_predictions=False):
     """
     Convert image tensors to numpy arrays.
@@ -38,10 +40,12 @@ def tensors2ims(opt, image_tensors, imtype=np.uint16, normalize=False, stack_pre
     
     elif imtype == "dlmbl":
         if opt.target == "nuclei":
-            image_numpy = (image_numpy * 1513) + 1407
+            image_numpy = undominmax_norm(image_numpy,8603.0,1335.0)    
+            image_numpy = (image_numpy + 1) / 2.0
             image_numpy.astype(np.float32)
         elif opt.target == "cyto":
-            image_numpy = (image_numpy * 5309) + 10274
+            image_numpy = undominmax_norm(image_numpy, 18372.0, 1335.0)
+            image_numpy = (image_numpy + 1) / 2.0
             image_numpy.astype(np.float32)
         else:
             raise ValueError("Unknown target")
