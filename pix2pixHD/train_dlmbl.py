@@ -60,6 +60,8 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
     print_delta = total_steps % opt.print_freq
 
     for i, data in enumerate(dataset_train, start=epoch_iter):
+        print('----')
+        print(opt.batchSize)
         if total_steps % opt.print_freq == print_delta:
             iter_start_time = time.time()
         total_steps += opt.batchSize
