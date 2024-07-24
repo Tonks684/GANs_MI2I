@@ -114,6 +114,9 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         b_ssim = []
         b_psnr = []
         for i in range(opt.batchSize):
+            print(visuals['synthesized_image'][i].shape)
+            print(visuals['real_image'].shape)
+                
             gen_image = visuals['synthesized_image'][i][:,:,0]
             gt_image = visuals['real_image'][i][:,:,0]
             score_ssim = ssim(gt_image, gen_image)
