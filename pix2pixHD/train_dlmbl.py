@@ -206,7 +206,7 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
 
         train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter)
         
-        [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG], virtual_stain, fluorescence, brightfield = val_epoch(model, dataset_val, epoch)
+        [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG], virtual_stain, fluorescence, brightfield = val_epoch(opt, model, dataset_val)
         
         visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Phase Contrast', 'Fluorescence', 'Virtual Stain'],writer,epoch,rows=brightfield.shape[0])
 
@@ -223,15 +223,9 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         epoch_generator = {'train': train_loss_G_Feat, 'validation': val_loss_G_Feat}
         writer.add_scalars('Generator Feature Matching Loss', epoch_generator, epoch)
 
-        epoch_ssim = {'train': mean_ssim, 'validation': val_ssim}
-        writer.add_scalars('SSIM', epoch_ssim, epoch)
-        epoch_psnr = {'train': mean_psnr, 'validation': val_psnr}
-        writer.add_scalars('PSNR', epoch_psnr, epoch)
-
+        
     print('Training Losses: D_fake: {}, D_real: {}, G_GAN: {}, G_GAN_Feat: {}, G_VGG: {}'.format(train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG))
     print('Validation Losses: D_fake: {}, D_real: {}, G_GAN: {}, G_GAN_Feat: {}, G_VGG: {}'.format(val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG))
-    print('SSIM: Train: {}, Validation: {}'.format(mean_ssim, val_ssim))
-    print('PSNR: Train: {}, Validation: {}'.format(mean_psnr, val_psnr))    
     print('End of epoch %d / %d \t Time Taken: %d sec' %
           (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
     ### save model for this epoch
