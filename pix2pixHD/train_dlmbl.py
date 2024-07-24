@@ -104,18 +104,7 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         
         virtual_stain = util.tensors2ims(opt, generated.data, imtype='dlmbl')
         fluorescence = util.tensors2ims(opt, data['image'], imtype='dlmbl')
-        # Compute metric
-        b_ssim = []
-        b_psnr = []
-        for i in range(opt.batchSize):
-            gen_image = virtual_stain[i][0]
-            gt_image = fluorescence[i][0]
-            score_ssim = ssim(gt_image, gen_image)
-            b_ssim.append(score_ssim)
-            score_psnr = psnr(gt_image, gen_image)
-            b_psnr.append(score_psnr)
-        ssim_scores.append(np.mean(b_ssim))
-        psnr_scores.append(np.mean(b_psnr))
+        
 
         if epoch_iter >= dataset_size:
                 break
@@ -124,7 +113,7 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         running_loss_D_real += loss_D_real
         running_loss_D_fake += loss_D_fake
         running_loss_G_VGG += loss_G_VGG
-    return running_loss_D_fake / dataset_size, running_loss_D_real/ dataset_size, running_loss_G_GAN / dataset_size, running_loss_G_GAN_Feat / dataset_size, running_loss_G_VGG/ dataset_size, np.mean(ssim_scores), np.mean(psnr_scores)
+    return running_loss_D_fake / dataset_size, running_loss_D_real/ dataset_size, running_loss_G_GAN / dataset_size, running_loss_G_GAN_Feat / dataset_size, running_loss_G_VGG/ dataset_size
 
 def val_epoch(opt, model, dataset_val, epoch):
     """
@@ -180,21 +169,8 @@ def val_epoch(opt, model, dataset_val, epoch):
             input_data = util.tensors2ims(opt, data['label'],imtype='dlmbl')
             virtual_stain = util.tensors2ims(opt, generated.data,imtype='dlmbl')
             fluorescence = util.tensors2ims(opt, data['image'],imtype='dlmbl')
-            # Compute metric
-            b_ssim = []
-            b_psnr = []
-            for i in range(opt.batchSize):
-
-                gen_image = virtual_stain[i][0]
-                gt_image = fluorescence[i][0]
-                score_ssim = ssim(gt_image, gen_image)
-                b_ssim.append(score_ssim)
-                score_psnr = psnr(gt_image, gen_image)
-                b_psnr.append(score_psnr)
-            ssim_scores.append(np.mean(b_ssim))
-            psnr_scores.append(np.mean(b_psnr))
-        
-        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  virtual_stain, fluorescence,  input_data
+            
+        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val)],  virtual_stain, fluorescence,  input_data
 
 
 
@@ -228,9 +204,9 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         # else:
         epoch_iter = epoch_iter % len(dataset_train)
 
-        train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, mean_ssim, mean_psnr = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter)
+        train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter)
         
-        [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG, val_ssim, val_psnr], virtual_stain, fluorescence, brightfield = val_epoch(model, dataset_val, epoch)
+        [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG], virtual_stain, fluorescence, brightfield = val_epoch(model, dataset_val, epoch)
         
         visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Phase Contrast', 'Fluorescence', 'Virtual Stain'],writer,epoch,rows=brightfield.shape[0])
 
