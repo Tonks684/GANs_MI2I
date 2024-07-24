@@ -51,12 +51,15 @@ class AlignedDataset(BaseDataset):
             dict: A dictionary containing the input data and paths.
         """
         A_path = self.A_paths[index]
-        A = Image.open(A_path)
+        A = Image.open(A_path).convert('F')
+       
+        # Zscore normalisation
+        A = A.point(lambda p: ((p-0.0000441)/0.0577))
         
         params = get_params(self.opt, A.size)
         if self.opt.label_nc == 0:
-            transform_A = get_transform(self.opt, params)
-            A_tensor = transform_A(A.convert('F').point(lambda p: p*(1/65535)))
+            transform_A = get_transform(self.opt, params, normalize=False)
+            A_tensor = transform_A(A)
         else:
             transform_A = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
             A_tensor = transform_A(A) * 255.0
@@ -65,8 +68,14 @@ class AlignedDataset(BaseDataset):
         if self.opt.isTrain or self.opt.use_encoded_image:
             B_path = self.B_paths[index]
             B = Image.open(B_path).convert('F')
+            if self.opt.target == 'nuclei':
+                B = B.point(lambda p: ((p-1407)/1513))
+            elif self.opt.target == 'cyto':
+                B = B.point(lambda p: ((p-10274)/5309))
+            else:
+                raise ValueError("Unknown target")
             transform_B = get_transform(self.opt, params)
-            B_tensor = transform_B(B.point(lambda p: p*(1/65535)))
+            B_tensor = transform_B(B)
 
         if not self.opt.no_instance:
             inst_path = self.inst_paths[index]

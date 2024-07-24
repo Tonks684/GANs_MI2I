@@ -9,7 +9,7 @@ from tifffile import imsave
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
 
-def tensors2ims(image_tensors, imtype=np.uint16, normalize=True, stack_predictions=False):
+def tensors2ims(opt, image_tensors, imtype=np.uint16, normalize=True, stack_predictions=False):
     """
     Convert image tensors to numpy arrays.
 
@@ -35,6 +35,14 @@ def tensors2ims(image_tensors, imtype=np.uint16, normalize=True, stack_predictio
         else:
             image_numpy = np.array(image_numpy) * 255.0
         image_numpy = np.clip(image_numpy, 0, 255)
+    
+    elif imtype == "dlmbl":
+        if opt.target == "nuclei":
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 1513) + 1407
+        elif opt.target == "cyto":
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 5309) + 10274
+        else:
+            raise ValueError("Unknown target")
     else:
         if normalize:
             image_numpy = (np.array(image_tensors) + 1) / 2.0
@@ -45,7 +53,7 @@ def tensors2ims(image_tensors, imtype=np.uint16, normalize=True, stack_predictio
 
 
 
-def tensor2im(image_tensor, imtype=np.float32, normalize=True, stack_predictions=False):
+def tensor2im(opt, image_tensor, imtype=np.float32, normalize=True, stack_predictions=False):
     """
     Convert a PyTorch tensor to a numpy array image.
 
@@ -78,6 +86,14 @@ def tensor2im(image_tensor, imtype=np.float32, normalize=True, stack_predictions
         else:
             image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0
         image_numpy = np.clip(image_numpy, 0, 255)
+    elif imtype == "dlmbl":
+        if opt.target == "nuclei":
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 1513) + 1407
+        elif opt.target == "cyto":
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 5309) + 10274
+        else:
+            raise ValueError("Unknown target")
+
     else:
         if normalize:
             image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0
