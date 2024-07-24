@@ -22,7 +22,7 @@ def tensors2ims(opt, image_tensors, imtype=np.uint16, normalize=True, stack_pred
     Returns:
         numpy.ndarray: Converted image numpy array.
     """
-    image_tensors = image_tensors.cpu().detach().numpy()
+    image_numpy = image_tensors.cpu().detach().numpy()
     if imtype == np.uint16:
         if normalize:
             image_numpy = (np.array(image_tensors) + 1) / 2.0 * 65535.0
