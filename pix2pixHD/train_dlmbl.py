@@ -165,7 +165,8 @@ def val_epoch(opt, model, dataset_val):
             running_loss_G_VGG += loss_G_VGG
             
         ### display output images
-
+        print('---')
+        print(generated.data.shape)
         input_data = util.tensors2ims(opt, data['label'],imtype='dlmbl')
         virtual_stain = util.tensors2ims(opt, generated.data,imtype='dlmbl')
         fluorescence = util.tensors2ims(opt, data['image'],imtype='dlmbl')
