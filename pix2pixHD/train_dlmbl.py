@@ -206,7 +206,7 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter)
         
         [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG], virtual_stain, fluorescence, brightfield = val_epoch(opt, model, dataset_val)
-        
+        print(virtual_stain.shape, fluorescence.shape, brightfield.shape)
         visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Phase Contrast', 'Fluorescence', 'Virtual Stain'],writer,epoch,rows=brightfield.shape[0])
 
         # Tensorboard Logging
