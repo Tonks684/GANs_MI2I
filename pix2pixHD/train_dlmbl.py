@@ -103,20 +103,25 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
             visualizer.plot_current_errors(errors, total_steps) 
         ### display output images
         visuals = OrderedDict([('label',
-                                util.tensor2im(data['label'][0],imtype=np.uint16)),
+                                util.tensors2ims(opt, data['label'],imtype='dlmbl')),
                                ('synthesized_image',
-                                util.tensor2im(generated.data[0],imtype=np.uint16)),
-                               ('real_image', util.tensor2im(data['image'][0],imtype=np.uint16))])
+                                util.tensors2ims(opt, generated.data,imtype='dlmbl')),
+                               ('real_image', util.tensors2ims(opt, data['image'],imtype='dlmbl'))])
         if save_fake:
             visualizer.display_current_results(visuals, epoch, total_steps)
         
         # Compute metric
-        gen_image = visuals['synthesized_image'][:,:,0]
-        gt_image = visuals['real_image'][:,:,0]
-        score_ssim = ssim(gt_image, gen_image)
-        ssim_scores.append(score_ssim)
-        score_psnr = psnr(gt_image, gen_image)
-        psnr_scores.append(score_psnr)
+        b_ssim = []
+        b_psnr = []
+        for i in range(opt.batchSize):
+            gen_image = visuals['synthesized_image'][i][:,:,0]
+            gt_image = visuals['real_image'][i][:,:,0]
+            score_ssim = ssim(gt_image, gen_image)
+            b_ssim.append(score_ssim)
+            score_psnr = psnr(gt_image, gen_image)
+            b_psnr.append(score_psnr)
+        ssim_scores.append(np.mean(b_ssim))
+        psnr_scores.append(np.mean(b_psnr))
 
         if epoch_iter >= dataset_size:
                 break
@@ -177,21 +182,26 @@ def val_epoch(opt, model, dataset_val, epoch):
             running_loss_G_GAN_Feat += loss_G_GAN_Feat
             running_loss_G_VGG += loss_G_VGG
             
-            visuals = OrderedDict([('input_label',
-                                util.tensor2im(data['label'][0],imtype=np.float32)),
+            ### display output images
+            visuals = OrderedDict([('label',
+                                util.tensors2ims(opt, data['label'],imtype='dlmbl')),
                                ('synthesized_image',
-                                util.tensor2im(generated.data[0],imtype='dlmbl')),
-                               ('real_image', util.tensor2im(data['image'][0],imtype='dlmbl'))])
-            gen_image = visuals['synthesized_image'][:,:,0]
-            gt_image = visuals['real_image'][:,:,0]
-            
-            score_ssim = ssim(gt_image, gen_image)
-            ssim_scores.append(score_ssim)
-            
-            score_psnr = psnr(gt_image, gen_image)
-            psnr_scores.append(score_psnr)
+                                util.tensors2ims(opt, generated.data,imtype='dlmbl')),
+                               ('real_image', util.tensors2ims(opt, data['image'],imtype='dlmbl'))])
+            # Compute metric
+            b_ssim = []
+            b_psnr = []
+            for i in range(opt.batchSize):
+                gen_image = visuals['synthesized_image'][i][:,:,0]
+                gt_image = visuals['real_image'][i][:,:,0]
+                score_ssim = ssim(gt_image, gen_image)
+                b_ssim.append(score_ssim)
+                score_psnr = psnr(gt_image, gen_image)
+                b_psnr.append(score_psnr)
+            ssim_scores.append(np.mean(b_ssim))
+            psnr_scores.append(np.mean(b_psnr))
         
-        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(opt, generated.data,imtype='dlmbl'), util.tensors2ims(opt,data['image'],imtype='dlmbl'), data['label']
+        return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val), np.mean(ssim_scores), np.mean(psnr_scores)],  util.tensors2ims(opt, generated.data,imtype='dlmbl'), util.tensors2ims(opt,data['image'],imtype='dlmbl'),  util.tensors2ims(opt,data['label'],imtype='dlmbl')
 
 
 
