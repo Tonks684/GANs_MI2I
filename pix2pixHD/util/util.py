@@ -48,7 +48,7 @@ def tensors2ims(opt, image_tensors, imtype=np.uint16, normalize=True, stack_pred
             image_numpy = (np.array(image_tensors) + 1) / 2.0
         else:
             image_numpy = np.transpose(image_numpy, (1, 2, 0))
-            image_numpy = np.clip(image_numpy, 0, 1)
+            # image_numpy = np.clip(image_numpy, 0, 1)
     return image_numpy.astype(imtype)
 
 
