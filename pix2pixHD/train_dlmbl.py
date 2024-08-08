@@ -16,7 +16,7 @@ from data.data_loader_dlmbl import CreateDataLoader
 import util.util as util
 from util.visualizer import Visualizer
 from pathlib import Path
-from tensorboardX import SummaryWriter
+from tensorboard import SummaryWriter
 def lcm(a,b): return abs(a * b)/math.gcd(a,b) if a and b else 0
 
 
@@ -194,7 +194,7 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
     """
     total_steps = (start_epoch-1) * (len(dataset_train)+len(dataset_val)) + epoch_iter 
     iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
-
+    print(start_epoch, opt.n_epochs)
     for epoch in range(start_epoch, opt.n_epochs):
         epoch_start_time = time.time()
         # if epoch == start_epoch:
