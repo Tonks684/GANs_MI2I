@@ -16,7 +16,7 @@ from data.data_loader_dlmbl import CreateDataLoader
 import util.util as util
 from util.visualizer import Visualizer
 from pathlib import Path
-from tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 def lcm(a,b): return abs(a * b)/math.gcd(a,b) if a and b else 0
 
 
