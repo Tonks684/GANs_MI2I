@@ -26,26 +26,10 @@ def inference(dataset, opt, model):
     Returns:
         None
     """
-    # if opt.data_type == 16:
-    #     model.half()
-    # elif opt.data_type == 8:
-    #     model.type(torch.uint8)
     for data in tqdm(dataset):
-        # if opt.data_type == 16:
-        #     data['label'] = data['label'].half()
-        #     data['inst'] = data['inst'].half()
-        # elif opt.data_type == 8:
-        #     data['label'] = data['label'].uint8()
-        #     data['inst'] = data['inst'].uint8()
         generated = model.inference(data['label'], data['inst'], data['image'])
-        generated_np = generated.data[0].cpu().detach().numpy()
         img_path = data['path']
-        # img_name = img_path[0].split('/')[-1]
-        # save_path = os.path.join(
-        #         opt.results_dir, 'raw_tensor')
-        # os.makedirs(save_path, exist_ok=True)
-        # imsave(f'{save_path}/{img_name}', generated_np.astype(np.float32),imagej=True)
-        visuals = OrderedDict([('synthesized_image', util.tensor2im(generated.data[0],imtype="dlmbl"))])
+        visuals = OrderedDict([('synthesized_image', util.tensor2im(opt,generated.data[0],imtype="dlmbl",normalize=False))])
         img_name = img_path[0].split('/')[-1]
         save_path = os.path.join(
                 opt.results_dir, img_name)
