@@ -86,17 +86,21 @@ def tensor2im(opt, image_tensor, imtype=np.float32, normalize=True, stack_predic
         else:
             image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 65535.0
         image_numpy = np.clip(image_numpy, 0, 65535)
+        image_numpy = image_numpy.astype(np.uint16)
     elif imtype == np.uint8:
         if normalize:
             image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
         else:
             image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0
         image_numpy = np.clip(image_numpy, 0, 255)
+        image_numpy = image_numpy.astype(np.uint8)
     elif imtype == "dlmbl":
         if opt.target == "nuclei":
             image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 1513) + 1407
+            image_numpy = image_numpy.astype(np.float32)
         elif opt.target == "cyto":
             image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 5309) + 10274
+            image_numpy = image_numpy.astype(np.float32)
         else:
             raise ValueError("Unknown target")
 
@@ -106,8 +110,7 @@ def tensor2im(opt, image_tensor, imtype=np.float32, normalize=True, stack_predic
         else:
             image_numpy = np.transpose(image_numpy, (1, 2, 0))
 
-    return image_numpy.astype(imtype)
-
+    return image_numpy
 # Converts a one-hot tensor into a colorful label map
 def tensor2label(label_tensor, n_label, imtype=np.uint16):
     """
