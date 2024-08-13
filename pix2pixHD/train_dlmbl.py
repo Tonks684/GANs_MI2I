@@ -197,7 +197,6 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         
         [val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG], virtual_stain, fluorescence, brightfield = val_epoch(opt, model, dataset_val)
         # Normalise Predictions
-        virtual_stain = util.tensors2ims(opt, virtual_stain,imtype='dlmbl')
         visualizer.results_plot(brightfield,fluorescence,virtual_stain,['Phase Contrast', 'Fluorescence', 'Virtual Stain'],writer,epoch,rows=brightfield.shape[0])
 
         # Tensorboard Logging
