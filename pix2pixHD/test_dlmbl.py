@@ -45,7 +45,7 @@ def inference(dataset, opt, model):
         #         opt.results_dir, 'raw_tensor')
         # os.makedirs(save_path, exist_ok=True)
         # imsave(f'{save_path}/{img_name}', generated_np.astype(np.float32),imagej=True)
-        visuals = OrderedDict([('input_label',util.tensor2label(data['label'][0], opt.label_nc)),('synthesized_image', util.tensor2im(generated.data[0],imtype=np.uint16))])
+        visuals = OrderedDict([('input_label',util.tensor2label(data['label'][0], opt.label_nc)),('synthesized_image', util.tensor2im(generated.data[0],imtype="dlmbl"))])
         img_name = img_path[0].split('/')[-1]
         save_path = os.path.join(
                 opt.results_dir, img_name)
