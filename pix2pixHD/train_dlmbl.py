@@ -96,15 +96,10 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         else:
             loss_D.backward()
         optimizer_D.step()
-        if total_steps % opt.print_freq == print_delta:
-            errors = {k: v.data.item() if not isinstance(v, int) else v for k, v in loss_dict.items()}
-            t = (time.time() - iter_start_time) / opt.print_freq
-            visualizer.print_current_errors(epoch, epoch_iter, errors, t)
-            visualizer.plot_current_errors(errors, total_steps) 
-        
-        virtual_stain = util.tensors2ims(opt, generated.data, imtype='dlmbl')
-        fluorescence = util.tensors2ims(opt, data['image'], imtype='dlmbl')
-        
+        errors = {k: v.data.item() if not isinstance(v, int) else v for k, v in loss_dict.items()}
+        t = (time.time() - iter_start_time) / opt.print_freq
+        visualizer.print_current_errors(epoch, epoch_iter, errors, t)
+            
 
         if epoch_iter >= dataset_size:
                 break
@@ -194,7 +189,7 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
     """
     total_steps = (start_epoch-1) * (len(dataset_train)+len(dataset_val)) + epoch_iter 
     iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
-    for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
+    for epoch in range(start_epoch, 200):
         epoch_start_time = time.time()
         epoch_iter = epoch_iter % len(dataset_train)
 
