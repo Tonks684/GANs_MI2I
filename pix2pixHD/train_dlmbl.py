@@ -99,10 +99,7 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         errors = {k: v.data.item() if not isinstance(v, int) else v for k, v in loss_dict.items()}
         t = (time.time() - iter_start_time) / opt.print_freq
         visualizer.print_current_errors(epoch, epoch_iter, errors, t)
-            
-
-        if epoch_iter >= dataset_size:
-                break
+    
         running_loss_G_GAN += loss_G_GAN
         running_loss_G_GAN_Feat += loss_G_GAN_Feat
         running_loss_D_real += loss_D_real
