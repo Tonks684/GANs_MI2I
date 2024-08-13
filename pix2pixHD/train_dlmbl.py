@@ -189,12 +189,7 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
     """
     total_steps = (start_epoch-1) * (len(dataset_train)+len(dataset_val)) + epoch_iter 
     iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
-<<<<<<< HEAD
-    for epoch in range(start_epoch, 200):
-=======
-    # print(start_epoch, opt.n_epochs)
     for epoch in range(start_epoch, opt.n_epochs):
->>>>>>> 408586545fe7dbb399eda0e8b772760e9a7341d8
         epoch_start_time = time.time()
         # if epoch == start_epoch:
         #     dummy_input = (torch.rand(1,1,opt.loadSize,opt.loadSize),torch.rand(1,1,opt.loadSize,opt.loadSize),torch.rand(1,1,opt.loadSize,opt.loadSize),torch.rand(1,1,opt.loadSize,opt.loadSize))
