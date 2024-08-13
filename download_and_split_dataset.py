@@ -128,7 +128,7 @@ if __name__ == "__main__":
     # Extract train and validation
     for a549_hoechst_folder in tqdm(range(1,30)):
         train_dataset_url = \
-        f"https://public.czbiohub.org/comp.micro/viscy/VSCyto2D/training/a549_hoechst_cellmask_train_val.zarr/0/0/{a549_hoechst_folder}/0"
+        f"https://public.czbiohub.org/comp.micro/viscy/VS_datasets/VSCyto2D/training/a549_hoechst_cellmask_train_val.zarr/0/0/{a549_hoechst_folder}/0"
         try:
             dataset = zarr.open(train_dataset_url, mode='r')
             print("Remote dataset accessed successfully.")
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     # Extract test set
     for a549_hoechst_folder in tqdm([0,5,10,15,20,25,30]):
         test_dataset_url = \
-        f"https://public.czbiohub.org/comp.micro/viscy/VSCyto2D/test/a549_hoechst_cellmask_test.zarr/0/0/{a549_hoechst_folder}/0/"
+        f"https://public.czbiohub.org/comp.micro/viscy/VS_datasets/VSCyto2D/test/a549_hoechst_cellmask_test.zarr/0/0/{a549_hoechst_folder}/0/"
         try:
             dataset = zarr.open(test_dataset_url, mode='r')
             print("Remote dataset accessed successfully.")
