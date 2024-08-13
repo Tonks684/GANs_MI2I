@@ -48,7 +48,7 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--debug', action='store_true', help='only do one epoch and displays at each iteration')
 
         # for training
-        self.parser.add_argument('--n_epochs', type=int, default='200', help='number_epochs')
+        self.parser.add_argument('--n_epochs', type=int, default='2', help='number_epochs')
         self.parser.add_argument('--continue_train', action='store_true', help='continue training: load the latest model')
         self.parser.add_argument('--load_pretrain', type=str, default='', help='load the pretrained model from the specified location')
         self.parser.add_argument('--which_epoch', type=str, default='latest', help='which epoch to load? set to latest to use latest cached model')

@@ -194,13 +194,8 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
     """
     total_steps = (start_epoch-1) * (len(dataset_train)+len(dataset_val)) + epoch_iter 
     iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
-    print(start_epoch, opt.n_epochs)
-    for epoch in range(start_epoch, opt.n_epochs):
+    for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         epoch_start_time = time.time()
-        # if epoch == start_epoch:
-        #     dummy_input = (torch.rand(1,1,opt.loadSize,opt.loadSize),torch.rand(1,1,opt.loadSize,opt.loadSize),torch.rand(1,1,opt.loadSize,opt.loadSize),torch.rand(1,1,opt.loadSize,opt.loadSize))
-        #     writer.add_graph(model.module.netG, dummy_input)    
-        # else:
         epoch_iter = epoch_iter % len(dataset_train)
 
         train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG, = train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D, total_steps, epoch, epoch_iter)
