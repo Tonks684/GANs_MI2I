@@ -156,9 +156,9 @@ def val_epoch(opt, model, dataset_val):
             running_loss_G_GAN_Feat += loss_G_GAN_Feat
             running_loss_G_VGG += loss_G_VGG
         ### display output images
-        input_data = util.tensors2ims(opt, data['label'],imtype='dlmbl')
-        virtual_stain = util.tensors2ims(opt, generated.data,imtype='dlmbl')
-        fluorescence = util.tensors2ims(opt, data['image'],imtype='dlmbl')
+        input_data = util.tensors2ims(opt, data['label'])
+        virtual_stain = util.tensors2ims(opt, generated.data, imtype='dlmbl')
+        fluorescence = util.tensors2ims(opt, data['image'], imtype='dlmbl')
             
         return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val)],  virtual_stain, fluorescence,  input_data
 
