@@ -199,11 +199,11 @@ class Visualizer():
                 axs[row, 0].axis('off')
 
                 # Plot the Fluorescence Stain image in the second column
-                axs[row, 1].imshow(target[row, 0],cmap='gray',vmin=np.percentile(target[row, 0],0.05), vmax = np.percentile(target[row, 0],0.95))
+                axs[row, 1].imshow(target[row, 0],cmap='gray',vmin=np.percentile(target[row, 0],5), vmax = np.percentile(target[row, 0],95))
                 axs[row, 1].axis('off')
-
+                
                 # Plot the Virtual Stain image in the third column
-                axs[row, 2].imshow(predictions[row, 0],cmap='gray', vmin=np.percentile(target[row, 0],0.05), vmax = np.percentile(target[row, 0],0.95))
+                axs[row, 2].imshow(predictions[row, 0],cmap='gray', vmin=np.percentile(target[row, 0],5), vmax = np.percentile(target[row, 0],95))
                 axs[row, 2].axis('off')
         else:
             # Set the titles for each column
@@ -216,11 +216,11 @@ class Visualizer():
             axs[0].axis('off')
 
             # Plot the Fluorescence Stain image in the second column
-            axs[1].imshow(target[0, 0],cmap='gray', vmin=np.percentile(target[row, 0],0.05), vmax = np.percentile(target[row, 0],0.95))
+            axs[1].imshow(target[0, 0],cmap='gray', vmin=np.percentile(target[0, 0],5), vmax = np.percentile(target[0, 0],95))
             axs[1].axis('off')
 
             # Plot the Virtual Stain image in the third column
-            axs[2].imshow(predictions[0, 0],cmap='gray', vmin=np.percentile(target[0, 0],0.05), vmax = np.percentile(target[0, 0],0.95))
+            axs[2].imshow(predictions[0, 0],cmap='gray', vmin=np.percentile(target[0, 0],5), vmax = np.percentile(target[0, 0],95))
             axs[2].axis('off')
         # Adjust the spacing between subplots
         plt.tight_layout()
