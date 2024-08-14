@@ -38,7 +38,7 @@ def inference(dataset, opt, model):
         print('Processing image... %s' % img_path)
         print(generated.data[0].shape, data['image'][0].shape)
         imsave(save_path_pred, visuals['synthesized_image'].astype(np.float32),imagej=True)
-        imsave(save_path_real,util.tensor2im(opt,data['image'],imtype='dlmbl',normalize=False),imagej=True)
+        imsave(save_path_real,util.tensor2im(opt,data['image'][0],imtype='dlmbl',normalize=False),imagej=True)
 def sampling(dataset, opt, model):
     """
     Perform sampling on the given dataset using the specified model.
