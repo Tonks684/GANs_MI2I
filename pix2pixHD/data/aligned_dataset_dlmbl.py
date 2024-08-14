@@ -67,19 +67,19 @@ class AlignedDataset(BaseDataset):
             A_tensor = transform_A(A) * 255.0
 
         B_tensor = inst_tensor = feat_tensor = 0
-        if self.opt.isTrain or self.opt.use_encoded_image:
-            B_path = self.B_paths[index]
-            B = imread(B_path)
-            if self.opt.target == 'nuclei':
-                B = self.minmax_norm(B, 8603.0, 0.0)
-                B = (B * 2) - 1
-            elif self.opt.target == 'cyto':
-                B = self.minmax_norm(B, 18372.0, 0.0)
-                B = (B * 2) - 1
-            else:
-                raise ValueError("Unknown target")
-            transform_B = get_transform(self.opt, params)
-            B_tensor = transform_B(B)
+        # if self.opt.isTrain or self.opt.use_encoded_image:
+        B_path = self.B_paths[index]
+        B = imread(B_path)
+        if self.opt.target == 'nuclei':
+            B = self.minmax_norm(B, 8603.0, 0.0)
+            B = (B * 2) - 1
+        elif self.opt.target == 'cyto':
+            B = self.minmax_norm(B, 18372.0, 0.0)
+            B = (B * 2) - 1
+        else:
+            raise ValueError("Unknown target")
+        transform_B = get_transform(self.opt, params)
+        B_tensor = transform_B(B)
 
         if not self.opt.no_instance:
             inst_path = self.inst_paths[index]
