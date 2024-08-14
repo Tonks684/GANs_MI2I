@@ -24,10 +24,10 @@ class AlignedDataset(BaseDataset):
         self.A_paths = sorted(make_dataset(self.dir_A))
 
         ### target B 
-        if opt.isTrain or opt.phase == 'val':         
-            self.dir_B = os.path.join(opt.dataroot,opt.target, f'{opt.phase}')
-            self.B_paths = sorted(make_dataset(self.dir_B))
-       
+        # if opt.isTrain or opt.phase == 'val':         
+        self.dir_B = os.path.join(opt.dataroot,opt.target, f'{opt.phase}')
+        self.B_paths = sorted(make_dataset(self.dir_B))
+    
         ### instance maps ()
         if not opt.no_instance:
             self.dir_inst = os.path.join(opt.dataroot, opt.phase + '_inst')
