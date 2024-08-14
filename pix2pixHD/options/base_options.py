@@ -46,7 +46,7 @@ class BaseOptions():
         # for setting inputs
         self.parser.add_argument('--dataroot', type=str, default='./datasets/cityscapes/')
         self.parser.add_argument('--target', type=str, default ='nuclei', help='folder name containing target virtual stain for training') 
-        self.parser.add_argument('--resize_or_crop', type=str, default='scale_width', help='scaling and cropping of images at load time [resize_and_crop|crop|scale_width|scale_width_and_crop]')
+        self.parser.add_argument('--resize_or_crop', type=str, default='none', help='scaling and cropping of images at load time [resize_and_crop|crop|scale_width|scale_width_and_crop]')
         self.parser.add_argument('--serial_batches', action='store_true', help='if true, takes images in order to make batches, otherwise takes them randomly')        
         self.parser.add_argument('--no_flip', default=True,action='store_true', help='if specified, do not flip the images for data argumentation') 
         self.parser.add_argument('--nThreads', default=2, type=int, help='# threads for loading data')                
