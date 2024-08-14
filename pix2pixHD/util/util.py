@@ -41,7 +41,7 @@ def tensors2ims(opt, image_tensors, imtype, normalize=False, stack_predictions=F
         image_numpy = np.clip(image_numpy, 0, 255)
     elif imtype == "dlmbl":
         if opt.target == "nuclei":
-            image_numpy = (image_numpy + 1) / 2.0  * 8603.0
+            image_numpy = (image_numpy + 1) / 2.0  * 22148.0
             image_numpy.astype(np.float32)
         elif opt.target == "cyto":
             image_numpy = (image_numpy + 1) / 2.0 * 18372.0
