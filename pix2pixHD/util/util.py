@@ -8,6 +8,7 @@ import os
 from tifffile import imsave
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
+
 def undominmax_norm(img,max,min):
     img = (img * (max - min)) + min
     return img.astype(np.float32)
@@ -40,12 +41,10 @@ def tensors2ims(opt, image_tensors, imtype, normalize=False, stack_predictions=F
         image_numpy = np.clip(image_numpy, 0, 255)
     elif imtype == "dlmbl":
         if opt.target == "nuclei":
-            image_numpy = undominmax_norm(image_numpy,8603.0,0)    
-            image_numpy = (image_numpy + 1) / 2.0
+            image_numpy = (image_numpy + 1) / 2.0  * 8603.0
             image_numpy.astype(np.float32)
         elif opt.target == "cyto":
-            image_numpy = undominmax_norm(image_numpy, 18372.0, 0)
-            image_numpy = (image_numpy + 1) / 2.0
+            image_numpy = (image_numpy + 1) / 2.0 * 18372.0
             image_numpy.astype(np.float32)
     else:
         if normalize:
@@ -94,10 +93,10 @@ def tensor2im(opt, image_tensor, imtype=np.float32, normalize=True, stack_predic
         image_numpy = image_numpy.astype(np.uint8)
     elif imtype == "dlmbl":
         if opt.target == "nuclei":
-            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) /2.0  * 8603.0
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0  * 8603.0
             image_numpy = image_numpy.astype(np.float32)
         elif opt.target == "cyto":
-            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1 / 2.0) * 18372.0
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 18372.0
             image_numpy = image_numpy.astype(np.float32)
         else:
             raise ValueError("Unknown target")
@@ -110,7 +109,7 @@ def tensor2im(opt, image_tensor, imtype=np.float32, normalize=True, stack_predic
 
     return image_numpy
 # Converts a one-hot tensor into a colorful label map
-def tensor2label(label_tensor, n_label, imtype=np.uint16):
+def tensor2label(label_tensor, n_label, imtype):
     """
     Convert a label tensor to a label image.
 
