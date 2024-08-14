@@ -94,10 +94,10 @@ def tensor2im(opt, image_tensor, imtype=np.float32, normalize=True, stack_predic
         image_numpy = image_numpy.astype(np.uint8)
     elif imtype == "dlmbl":
         if opt.target == "nuclei":
-            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 8603.0)
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) /2.0  * 8603.0
             image_numpy = image_numpy.astype(np.float32)
         elif opt.target == "cyto":
-            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) * 18372.0)
+            image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1 / 2.0) * 18372.0
             image_numpy = image_numpy.astype(np.float32)
         else:
             raise ValueError("Unknown target")

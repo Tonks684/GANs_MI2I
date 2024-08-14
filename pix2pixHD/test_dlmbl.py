@@ -49,17 +49,7 @@ def sampling(dataset, opt, model):
     """
     for data in tqdm(dataset):
         for sample in range(opt.variational_inf_runs):
-            if opt.data_type == 16:
-                model.half()
-            elif opt.data_type == 8:
-                model.type(torch.uint8)
             for data in tqdm(dataset):
-                if opt.data_type == 16:
-                    data['label'] = data['label'].half()
-                    data['inst'] = data['inst'].half()
-                elif opt.data_type == 8:
-                    data['label'] = data['label'].uint8()
-                    data['inst'] = data['inst'].uint8()
                 generated = model.inference(data['label'], data['inst'], data['image'])
                 generated.cpu()
                 if opt.output_reshape:
@@ -72,7 +62,7 @@ def sampling(dataset, opt, model):
                         input_label, (opt.output_reshape, opt.output_reshape))
                     visuals = OrderedDict([('input_label', input_label),('synthesized_image', prediction)])
                 else:
-                    visuals = OrderedDict([('input_label',util.tensor2label(data['label'][0], opt.label_nc)),('synthesized_image', util.tensor2im(generated.data[0],imtype=np.uint16))])
+                    visuals = OrderedDict([('input_label',util.tensor2label(data['label'][0], opt.label_nc)),('synthesized_image', util.tensor2im(generated.data[0],imtype='dlmbl',normalize=False))])
                 img_path = data['path']
                 print('Processing image... %s' % img_path)
                 img_name = img_path[0].split('/')[-1]
