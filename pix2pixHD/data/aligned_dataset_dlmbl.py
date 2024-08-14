@@ -71,7 +71,7 @@ class AlignedDataset(BaseDataset):
         B_path = self.B_paths[index]
         B = imread(B_path)
         if self.opt.target == 'nuclei':
-            B = self.minmax_norm(B, 8603.0, 0.0)
+            B = self.minmax_norm(B, 22148.0, 0.0)
             B = (B * 2) - 1
         elif self.opt.target == 'cyto':
             B = self.minmax_norm(B, 18372.0, 0.0)
