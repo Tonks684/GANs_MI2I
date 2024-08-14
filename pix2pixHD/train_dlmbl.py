@@ -156,17 +156,17 @@ def val_epoch(opt, model, dataset_val):
             running_loss_G_GAN_Feat += loss_G_GAN_Feat
             running_loss_G_VGG += loss_G_VGG
         ### display output images
-        imsave(f'preepoch{val_epoch}input.tiff',np.array(data['label']),imagej=True)
-        imsave(f'preepoch{val_epoch}virtual_stain.tiff',np.array(generated.data),imagej=True)
-        imsave(f'preepoch{val_epoch}fluorescence.tiff',np.array(data['image']),imagej=True)
+        imsave(f'preepochinput.tiff',data['label'].detach().cpu().float().numpy(),imagej=True)
+        imsave(f'preepochvirtual_stain.tiff',generated.data.detach().cpu().float().numpy(),imagej=True)
+        imsave(f'preepochfluorescence.tiff',data['image'].detach().cpu().float().numpy(),imagej=True)
         
         input_data = util.tensors2ims(opt, data['label'], imtype=np.float32)
         virtual_stain = util.tensors2ims(opt, generated.data, imtype='dlmbl')
         fluorescence = util.tensors2ims(opt, data['image'], imtype='dlmbl')
         
-        imsave(f'postepoch{val_epoch}input.tiff',input_data,imagej=True)
-        imsave(f'postepoch{val_epoch}virtual_stain.tiff',virtual_stain,imagej=True)
-        imsave(f'postepoch{val_epoch}fluorescence.tiff',fluorescence,imagej=True)
+        imsave(f'postepochinput.tiff',input_data,imagej=True)
+        imsave(f'postepochvirtual_stain.tiff',virtual_stain,imagej=True)
+        imsave(f'postepochfluorescence.tiff',fluorescence,imagej=True)
         return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val)],  virtual_stain, fluorescence,  input_data
 
 
