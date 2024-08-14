@@ -36,7 +36,7 @@ def inference(dataset, opt, model):
         save_path_real = os.path.join(
                 opt.results_dir, img_path[0].split('/')[-1][:-5] + '_real.tiff')
         print('Processing image... %s' % img_path)
-        print(generated.data[0].shape, data['image'].shape)
+        print(generated.data[0].shape, data['image'][0].shape)
         imsave(save_path_pred, visuals['synthesized_image'].astype(np.float32),imagej=True)
         imsave(save_path_real,util.tensor2im(opt,data['image'],imtype='dlmbl',normalize=False),imagej=True)
 def sampling(dataset, opt, model):
