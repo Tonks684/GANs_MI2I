@@ -27,7 +27,8 @@ class AlignedDataset(BaseDataset):
         # if opt.isTrain or opt.phase == 'val':         
         self.dir_B = os.path.join(opt.dataroot,opt.target, f'{opt.phase}')
         self.B_paths = sorted(make_dataset(self.dir_B))
-    
+
+        assert self.B_paths == self.A_paths, "The number of images in the input and target folders must be the same {} != {}".format(len(self.A_paths), len(self.B_paths))
         ### instance maps ()
         if not opt.no_instance:
             self.dir_inst = os.path.join(opt.dataroot, opt.phase + '_inst')
