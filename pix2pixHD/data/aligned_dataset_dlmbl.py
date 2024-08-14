@@ -40,7 +40,7 @@ class AlignedDataset(BaseDataset):
             self.feat_paths = sorted(make_dataset(self.dir_feat))
         self.dataset_size = len(self.A_paths)
     
-    def minmax_norm(self, img,min,max):
+    def minmax_norm(self, img,max,min):
         img = (img - min) / (max - min)
         return img.astype(np.float32)
         
@@ -70,10 +70,10 @@ class AlignedDataset(BaseDataset):
             B_path = self.B_paths[index]
             B = imread(B_path)
             if self.opt.target == 'nuclei':
-                B = self.minmax_norm(B,8603.0,1335.0)
+                B = self.minmax_norm(B,8603.0,0.0)
                 B = (B * 2) - 1
             elif self.opt.target == 'cyto':
-                B = self.minmax_norm(B, 18372.0, 1335.0)
+                B = self.minmax_norm(B, 18372.0,0.0)
                 B = (B * 2) - 1
             else:
                 raise ValueError("Unknown target")

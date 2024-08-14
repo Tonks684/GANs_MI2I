@@ -20,7 +20,7 @@ class BaseOptions():
         Initialize the command line arguments.
         """
         # experiment specifics
-        self.parser.add_argument('--name', type=str, default='label2city', help='name of the experiment. It decides where to store samples and models')        
+        self.parser.add_argument('--name', type=str, default='dlmbl', help='name of the experiment. It decides where to store samples and models')        
         self.parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         self.parser.add_argument('--checkpoints_dir', type=str, default='./training/', help='models are saved here')
         self.parser.add_argument('--model', type=str, default='pix2pixHD', help='which model to use')
@@ -33,12 +33,12 @@ class BaseOptions():
         self.parser.add_argument('--local_rank', type=int, default=0, help='local rank for distributed training')
 
         # input/output sizes       
-        self.parser.add_argument('--batchSize', type=int, default=4, help='input batch size')
-        self.parser.add_argument('--loadSize', type=int, default=1024, help='scale images to this size')
+        self.parser.add_argument('--batchSize', type=int, default=8, help='input batch size')
+        self.parser.add_argument('--loadSize', type=int, default=512, help='scale images to this size')
         self.parser.add_argument('--fineSize', type=int, default=512, help='then crop to this size')
         self.parser.add_argument('--label_nc', type=int, default=0, help='# of input label channels')
-        self.parser.add_argument('--input_nc', type=int, default=3, help='# of input image channels')
-        self.parser.add_argument('--output_nc', type=int, default=3, help='# of output image channels')
+        self.parser.add_argument('--input_nc', type=int, default=1, help='# of input image channels')
+        self.parser.add_argument('--output_nc', type=int, default=1, help='# of output image channels')
         self.parser.add_argument('--input_RGB', default=False, help='# RGB?')
         self.parser.add_argument('--output_RGB', default=False, help='# RGB?')
         self.parser.add_argument('--seed', type=int, help='set seed for run')
@@ -80,7 +80,7 @@ class BaseOptions():
         self.parser.add_argument('--n_downsample_E', type=int, default=4, help='# of downsampling layers in encoder') 
         self.parser.add_argument('--nef', type=int, default=16, help='# of encoder filters in the first conv layer')        
         self.parser.add_argument('--n_clusters', type=int, default=10, help='number of clusters for features')
-        self.parser.add_argument("--output_reshape", type=int,
+        self.parser.add_argument("--output_reshape", type=int, default=512,
                                   help="resize model output to this shape fixed to same for x and y")
 
         self.initialized = True
