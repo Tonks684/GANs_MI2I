@@ -38,7 +38,6 @@ def tensors2ims(opt, image_tensors, imtype, normalize=False, stack_predictions=F
         else:
             image_numpy = np.array(image_numpy) * 255.0
         image_numpy = np.clip(image_numpy, 0, 255)
-    
     elif imtype == "dlmbl":
         if opt.target == "nuclei":
             image_numpy = undominmax_norm(image_numpy,8603.0,0)    
