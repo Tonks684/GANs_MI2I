@@ -220,22 +220,22 @@ def train(opt, model, visualizer, dataset_train, dataset_val, optimizer_G, optim
         writer.add_scalars('Generator Feature Matching Loss', epoch_generator, epoch)
 
         
-    print('Training Losses: D_fake: {}, D_real: {}, G_GAN: {}, G_GAN_Feat: {}, G_VGG: {}'.format(train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG))
-    print('Validation Losses: D_fake: {}, D_real: {}, G_GAN: {}, G_GAN_Feat: {}, G_VGG: {}'.format(val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG))
-    print('End of epoch %d / %d \t Time Taken: %d sec' %
-          (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
-    ### save model for this epoch
-    if epoch % opt.save_epoch_freq == 0:
-        print('Saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))
-        model.module.save('latest')
-        model.module.save(epoch)
-        np.savetxt(iter_path, (epoch+1, 0), delimiter=',', fmt='%d')
+        print('Training Losses: D_fake: {}, D_real: {}, G_GAN: {}, G_GAN_Feat: {}, G_VGG: {}'.format(train_loss_D_fake, train_loss_D_real, train_loss_G_GAN, train_loss_G_Feat, train_loss_G_VGG))
+        print('Validation Losses: D_fake: {}, D_real: {}, G_GAN: {}, G_GAN_Feat: {}, G_VGG: {}'.format(val_loss_D_fake, val_loss_D_real, val_loss_G_GAN, val_loss_G_Feat, val_loss_G_VGG))
+        print('End of epoch %d / %d \t Time Taken: %d sec' %
+            (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
+        ### save model for this epoch
+        if epoch % opt.save_epoch_freq == 0:
+            print('Saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))
+            model.module.save('latest')
+            model.module.save(epoch)
+            np.savetxt(iter_path, (epoch+1, 0), delimiter=',', fmt='%d')
 
-    ### instead of only training the local enhancer, train the entire network after certain iterations
-    if (opt.niter_fix_global != 0) and (epoch == opt.niter_fix_global):
-        model.module.update_fixed_params()
+        ### instead of only training the local enhancer, train the entire network after certain iterations
+        if (opt.niter_fix_global != 0) and (epoch == opt.niter_fix_global):
+            model.module.update_fixed_params()
 
-    ### linearly decay learning rate after certain iterations
-    if epoch > opt.niter:
-        model.module.update_learning_rate()
+        ### linearly decay learning rate after certain iterations
+        if epoch > opt.niter:
+            model.module.update_learning_rate()
     
