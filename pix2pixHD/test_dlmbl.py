@@ -1,12 +1,7 @@
 import os
 from collections import OrderedDict
-import torch
 import util.util as util
-from data.data_loader_dlmbl import CreateDataLoader
-from models.models import create_model
 import numpy as np
-from options.test_options import TestOptions
-from util.visualizer import Visualizer
 import cv2
 import torch
 from tifffile import imsave
@@ -35,10 +30,8 @@ def inference(dataset, opt, model):
                 opt.results_dir, img_name)
         save_path_real = os.path.join(
                 opt.results_dir, img_path[0].split('/')[-1][:-5] + '_real.tiff')
-        print('Processing image... %s' % img_path)
-        print(generated.data[0].shape, data['image'][0].shape)
         imsave(save_path_pred, visuals['synthesized_image'].astype(np.float32),imagej=True)
-        imsave(save_path_real,util.tensor2im(opt,data['image'][0],imtype='dlmbl',normalize=False),imagej=True)
+        imsave(save_path_real,util.tensor2im(opt,data['image'],imtype='dlmbl',normalize=False),imagej=True)
 def sampling(dataset, opt, model):
     """
     Perform sampling on the given dataset using the specified model.
