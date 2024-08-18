@@ -25,7 +25,7 @@ def inference(dataset, opt, model):
         generated = model.inference(data['label'], data['inst'], data['image'])
         img_path = data['path']
         # Unnormalize the image
-        generated = util.tensors2ims(opt,generated.data.detach().cpu().float().numpy(),imtype="dlmbl")
+        generated = util.tensors2ims(opt,generated.data,imtype="dlmbl")
         visuals = OrderedDict([('synthesized_image',generated )])
         img_name = img_path[0].split('/')[-1]
         save_path_pred = os.path.join(
