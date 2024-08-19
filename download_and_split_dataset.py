@@ -51,7 +51,7 @@ def move_files(file_list, split_type, folders):
             dst = folder_path / split_type / file_name
             shutil.move(src, dst)
 
-def create_train_val_split(input_folder, nuclei_folder, cyto_folder, split_ratio=0.8):
+def create_train_val_split(input_folder, nuclei_folder, cyto_folder, split_ratio:=0.6):
     """
     Create train and validation splits of the dataset.
 
