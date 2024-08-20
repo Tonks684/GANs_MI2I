@@ -44,7 +44,10 @@ def sampling(dataset, opt, model):
     Returns:
         None
     """
-    for data in tqdm(dataset):
+    for index, data in tqdm(enumerate(dataset)):
+        #Processs only the first 5 data:
+        if index == 5:
+            break
         stack_pred = np.zeros((opt.variational_inf_runs,512,512))
         for sample in range(opt.variational_inf_runs):
             generated = model.inference(data['label'], data['inst'], data['image'])
