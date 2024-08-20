@@ -68,5 +68,24 @@ class TestOptions(BaseOptions):
           self.parser.add_argument("--variational_inf_path", type=str,
                                          help="path to save variational inf outputs")
           
-          self.isTrain = False
+          # Filter out the Jupyter specific arguments
+          jupyter_args = [
+               "--ip",
+               "--stdin",
+               "--control",
+               "--hb",
+               "--Session.signature_scheme",
+               "--Session.key",
+               "--shell",
+               "--transport",
+               "--iopub",
+               "--f",
+          ]
+          filtered_argv = [
+               arg for arg in sys.argv if not any(jarg in arg for jarg in jupyter_args)
+          ]
 
+          self.opt, unknown = self.parser.parse_known_args(filtered_argv)
+          self.opt.isTrain = self.isTrain  # train or test
+
+               
