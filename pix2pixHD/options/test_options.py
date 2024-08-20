@@ -67,6 +67,7 @@ class TestOptions(BaseOptions):
                                          help="no. runs for variational_inference.py")
           self.parser.add_argument("--variational_inf_path", type=str,
                                          help="path to save variational inf outputs")
+          self.isTrain = False
      
      def parse(self, save=True):
         """
@@ -97,7 +98,7 @@ class TestOptions(BaseOptions):
         filtered_argv = [
             arg for arg in sys.argv if not any(jarg in arg for jarg in jupyter_args)
         ]
-
+     
         self.opt, unknown = self.parser.parse_known_args(filtered_argv)
         return self.opt   
         
