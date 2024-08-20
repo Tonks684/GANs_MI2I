@@ -25,7 +25,7 @@ def inference(dataset, opt, model):
         generated = model.inference(data['label'], data['inst'], data['image'])
         img_path = data['path']
         # Unnormalize the image
-        generated = util.tensors2ims(opt,generated.data,imtype="dlmbl")
+        generated = util.tensors2ims(opt,generated.data,imtype="dlmbl",normalize=False)
         visuals = OrderedDict([('synthesized_image',generated )])
         img_name = img_path[0].split('/')[-1]
         save_path_pred = os.path.join(
@@ -48,7 +48,7 @@ def sampling(dataset, opt, model):
         stack_pred = np.zeros((opt.variational_inf_runs,512,512))
         for sample in range(opt.variational_inf_runs):
             generated = model.inference(data['label'], data['inst'], data['image'])
-            visuals = OrderedDict([('input_label',util.tensors2ims(opt, data['label'][0], imtype=np.float32)),('synthesized_image', util.tensors2ims(opt,generated.data[0],imtype='dlmbl'))])
+            visuals = OrderedDict([('input_label',util.tensors2ims(opt, data['label'][0], imtype=np.float32),normalize=False,),('synthesized_image', util.tensors2ims(opt,generated.data[0],imtype='dlmbl',normalize=False))])
             stack_pred[sample] = visuals['synthesized_image']
 
         img_path = data['path']
