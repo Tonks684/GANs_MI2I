@@ -44,7 +44,7 @@ def sampling(dataset, opt, model):
     Returns:
         None
     """
-    os.mkdirs(opt.results_dir,exist_ok=True)
+    os.makedirs(opt.results_dir,exist_ok=True)
     for index, data in tqdm(enumerate(dataset)):
         #Processs only the first 5 data:
         if index == 5:
