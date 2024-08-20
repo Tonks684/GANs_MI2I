@@ -88,4 +88,7 @@ class TestOptions(BaseOptions):
           self.opt, unknown = self.parser.parse_known_args(filtered_argv)
           self.opt.isTrain = self.isTrain  # train or test
 
-               
+# Example usage
+if __name__ == "__main__":
+    opt = TestOptions().parse()
+    print(opt)
