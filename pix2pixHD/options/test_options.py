@@ -67,28 +67,37 @@ class TestOptions(BaseOptions):
                                          help="no. runs for variational_inference.py")
           self.parser.add_argument("--variational_inf_path", type=str,
                                          help="path to save variational inf outputs")
-          
-          # Filter out the Jupyter specific arguments
-          jupyter_args = [
-               "--ip",
-               "--stdin",
-               "--control",
-               "--hb",
-               "--Session.signature_scheme",
-               "--Session.key",
-               "--shell",
-               "--transport",
-               "--iopub",
-               "--f",
-          ]
-          filtered_argv = [
-               arg for arg in sys.argv if not any(jarg in arg for jarg in jupyter_args)
-          ]
+     
+     def parse(self, save=True):
+        """
+        Parse the command line arguments and return the options.
 
-          self.opt, unknown = self.parser.parse_known_args(filtered_argv)
-          self.opt.isTrain = self.isTrain  # train or test
+        Args:
+            save (bool): Whether to save the options to a file.
 
-# Example usage
-if __name__ == "__main__":
-    opt = TestOptions().parse()
-    print(opt)
+        Returns:
+            argparse.Namespace: The parsed command line arguments.
+        """
+        if not self.initialized:
+            self.initialize()
+
+        # Filter out the Jupyter specific arguments
+        jupyter_args = [
+            "--ip",
+            "--stdin",
+            "--control",
+            "--hb",
+            "--Session.signature_scheme",
+            "--Session.key",
+            "--shell",
+            "--transport",
+            "--iopub",
+            "--f",
+        ]
+        filtered_argv = [
+            arg for arg in sys.argv if not any(jarg in arg for jarg in jupyter_args)
+        ]
+
+        self.opt, unknown = self.parser.parse_known_args(filtered_argv)
+        return self.opt   
+        
