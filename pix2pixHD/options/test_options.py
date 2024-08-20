@@ -98,7 +98,8 @@ class TestOptions(BaseOptions):
         filtered_argv = [
             arg for arg in sys.argv if not any(jarg in arg for jarg in jupyter_args)
         ]
-        self.opt.isTrain = self.isTrain  # train or test
         self.opt, unknown = self.parser.parse_known_args(filtered_argv)
+        self.opt.isTrain = self.isTrain  # train or test
+        
         return self.opt   
         
