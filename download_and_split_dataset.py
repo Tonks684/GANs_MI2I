@@ -91,24 +91,24 @@ def create_train_val_split(input_folder, nuclei_folder, cyto_folder, split_ratio
     move_files(train_files, 'train',folders)
     move_files(val_files, 'val', folders)
 
-def save_crops(input_crops, channel_folder, a549_hoechst_folder, img, args):
-    """
-    Save the input crops as TIFF images.
+# def save_crops(input_crops, channel_folder, a549_hoechst_folder, img, args):
+#     """
+#     Save the input crops as TIFF images.
 
-    Args:
-        input_crops (list): List of input crops to be saved.
-        channel_folder (str): Name of the channel folder.
-        a549_hoechst_folder (str): Name of the A549 Hoechst folder.
-        img (str): Name of the image.
-        args (argparse.Namespace): Command-line arguments.
+#     Args:
+#         input_crops (list): List of input crops to be saved.
+#         channel_folder (str): Name of the channel folder.
+#         a549_hoechst_folder (str): Name of the A549 Hoechst folder.
+#         img (str): Name of the image.
+#         args (argparse.Namespace): Command-line arguments.
 
-    Returns:
-        None
-    """
-    for i, crop in enumerate(input_crops):
-        output_path = f'{args.output_image_folder}/{channel_folder}/{a549_hoechst_folder}_{img}_crop{i}.tiff'
-        imwrite(output_path, crop.astype(np.float32), imagej=True)
-        print(f"Saved crop to {output_path}")
+#     Returns:
+#         None
+#     """
+#     for i, crop in enumerate(input_crops):
+#         output_path = f'{args.output_image_folder}/{channel_folder}/{a549_hoechst_folder}_{img}_crop{i}.tiff'
+#         imwrite(output_path, crop.astype(np.float32), imagej=True)
+#         print(f"Saved crop to {output_path}")
     
 
 if __name__ == "__main__":
