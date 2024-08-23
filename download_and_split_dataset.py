@@ -3,7 +3,7 @@ import zarr
 import os
 from tqdm import tqdm
 import random
-from tifffile import imread,imsave
+from tifffile import imread,imwrite
 import os
 import random
 import shutil
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     args = args.parse_args()
 
     #Create folders
-    for folder in ['train','val','test']:
+    for folder in ['train','test']:
         os.makedirs(f'{args.output_image_folder}/nuclei/{folder}', exist_ok=True)
         os.makedirs(f'{args.output_image_folder}/cyto/{folder}', exist_ok=True)
         os.makedirs(f'{args.output_image_folder}/input/{folder}', exist_ok=True)
@@ -135,14 +135,12 @@ if __name__ == "__main__":
             dataset_np = np.array(dataset)
             for img in tqdm(range(dataset_np.shape[2])):
                 input_x = dataset_np[0,0,img]
-                input_crops = crop_image(input_x, args.crop_size)
-                save_crops(input_crops, 'input', a549_hoechst_folder, img, args)
+                imwrite(f'{args.output_image_folder}/input/train/{a549_hoechst_folder}_{img}.tiff',input_x.astype(np.float32),imagej=True)
                 nuclei = dataset_np[0,1,img]
-                nuclei_crops = crop_image(nuclei, args.crop_size)
-                save_crops(nuclei_crops, 'nuclei',a549_hoechst_folder, img, args)
+                imwrite(f'{args.output_image_folder}/nuclei/train/{a549_hoechst_folder}_{img}.tiff',nuclei.astype(np.float32),imagej=True)
                 cyto = dataset_np[0,2,img]
-                cyto_crops = crop_image(cyto, args.crop_size)
-                save_crops(cyto_crops,'cyto', a549_hoechst_folder, img, args)
+                imwrite(f'{args.output_image_folder}/cyto/train/{a549_hoechst_folder}_{img}.tiff',cyto.astype(np.float32),imagej=True)
+                
         except Exception as e:
             print(f"Failed to access remote dataset: {e}")
 
@@ -158,18 +156,16 @@ if __name__ == "__main__":
             dataset_np = np.array(dataset)
             for img in tqdm(range(dataset_np.shape[2])):
                 input_x = dataset_np[0,0,img]
-                input_crops = crop_image(input_x, args.crop_size)
-                save_crops(input_crops,'input/test/', a549_hoechst_folder, img, args)
-                nuclei = dataset_np[0,1,img]
-                nuclei_crops = crop_image(nuclei, args.crop_size)
-                save_crops(nuclei_crops,'nuclei/test/', a549_hoechst_folder, img, args)
-                cyto = dataset_np[0,2,img]
-                cyto_crops = crop_image(cyto, args.crop_size)
-                save_crops(cyto_crops,'cyto/test/', a549_hoechst_folder, img, args)
-                nuclei_masks = dataset_np[0,3,img]
-                nuclei_crops = crop_image(nuclei_masks, args.crop_size)
-                save_crops(nuclei_crops,'nuclei/masks/', a549_hoechst_folder, img, args)
+                imwrite(f'{args.output_image_folder}/input/val/{a549_hoechst_folder}_{img}.tiff',input_x.astype(np.float32),imagej=True)
                 
-
+                nuclei = dataset_np[0,1,img]
+                imwrite(f'{args.output_image_folder}/nuclei/val/{a549_hoechst_folder}_{img}.tiff',nuclei.astype(np.float32),imagej=True)
+                
+                cyto = dataset_np[0,2,img]
+                imwrite(f'{args.output_image_folder}/cyto/val/{a549_hoechst_folder}_{img}.tiff',cyto.astype(np.float32),imagej=True)
+                
+                nuclei_masks = dataset_np[0,3,img]
+                imwrite(f'{args.output_image_folder}/nuclei/masks{a549_hoechst_folder}_{img}.tiff',nuclei_masks.astype(np.uint16),imagej=True)
+                
         except Exception as e:
             print(f"Failed to access remote dataset: {e}")
