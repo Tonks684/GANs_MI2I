@@ -107,7 +107,7 @@ def save_crops(input_crops, channel_folder, a549_hoechst_folder, img, args):
     """
     for i, crop in enumerate(input_crops):
         output_path = f'{args.output_image_folder}/{channel_folder}/{a549_hoechst_folder}_{img}_crop{i}.tiff'
-        imsave(output_path, crop.astype(np.float32), imagej=True)
+        imwrite(output_path, crop.astype(np.float32), imagej=True)
         print(f"Saved crop to {output_path}")
     
 
