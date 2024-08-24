@@ -72,9 +72,9 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
         loss_dict = dict(zip(model.module.loss_names, losses))
         # calculate final loss scalar
-        loss_D_fake = loss_dict['D_fake']
-        loss_D_real = loss_dict['D_real']
-        loss_D =(loss_D_fake+loss_D_real) * 0.5
+        loss_D_fake = loss_dict['D_fake']* 0.5
+        loss_D_real = loss_dict['D_real']* 0.5
+        loss_D =(loss_D_fake+loss_D_real)
         
         loss_G_GAN = loss_dict['G_GAN'] 
         loss_G_GAN_Feat = loss_dict.get('G_GAN_Feat',0) 
@@ -156,17 +156,11 @@ def val_epoch(opt, model, dataset_val):
             running_loss_G_GAN_Feat += loss_G_GAN_Feat
             running_loss_G_VGG += loss_G_VGG
         ### display output images
-        imsave(f'preepochinput.tiff',data['label'].detach().cpu().float().numpy(),imagej=True)
-        imsave(f'preepochvirtual_stain.tiff',generated.data.detach().cpu().float().numpy(),imagej=True)
-        imsave(f'preepochfluorescence.tiff',data['image'].detach().cpu().float().numpy(),imagej=True)
         
         input_data = util.tensors2ims(opt, data['label'], imtype=np.float32)
         virtual_stain = util.tensors2ims(opt, generated.data, imtype='dlmbl')
         fluorescence = util.tensors2ims(opt, data['image'], imtype='dlmbl')
         
-        imsave(f'postepochinput.tiff',input_data,imagej=True)
-        imsave(f'postepochvirtual_stain.tiff',virtual_stain,imagej=True)
-        imsave(f'postepochfluorescence.tiff',fluorescence,imagej=True)
         return [running_loss_D_fake / len(dataset_val), running_loss_D_real/ len(dataset_val), running_loss_G_GAN / len(dataset_val), running_loss_G_GAN_Feat / len(dataset_val), running_loss_G_VGG/ len(dataset_val)],  virtual_stain, fluorescence,  input_data
 
 
