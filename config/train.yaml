@@ -1,0 +1,58 @@
+# GANs_MI2I training configuration
+# Pass to training with: python pix2pixHD/train_dlmbl.py $(python command_gen.py)
+# or: python command_gen.py | xargs python pix2pixHD/train_dlmbl.py
+
+name: dlmbl_vscyto
+dataroot: ../../data           # path to dataset root (contains input/, nuclei/, cyto/)
+target: nuclei                 # subfolder used as training target (nuclei or cyto)
+checkpoints_dir: ../../checkpoints
+
+# Image settings
+data_type: 16
+input_nc: 1
+output_nc: 1
+label_nc: 0
+loadSize: 256
+fineSize: 256
+resize_or_crop: none
+no_instance: true
+no_flip: true
+
+# Model architecture
+netG: global
+ngf: 64
+ndf: 32
+n_downsample_global: 4
+n_blocks_global: 9
+norm: instance
+use_dropout: true
+
+# Training
+batchSize: 4
+nThreads: 4
+n_epochs: 200        # total epochs (niter + niter_decay)
+niter: 100           # epochs at base lr
+niter_decay: 100     # epochs to linearly decay lr to 0
+seed: 42
+
+# Optimiser
+gpu_ids: "0"         # comma-separated, e.g. "0,1" for multi-GPU; "-1" for CPU
+fp16: false          # enable automatic mixed precision (AMP)
+
+# Logging / checkpointing
+display_freq: 100
+print_freq: 100
+save_epoch_freq: 10
+
+# Loss
+no_vgg_loss: true
+lambda_feat: 10.0
+
+# Resume
+# continue_train: true
+# which_epoch: latest
+
+# Weights & Biases (optional — set use_wandb: true to enable)
+# use_wandb: true
+# wandb_project: gans-mi2i
+# wandb_run_name: null    # defaults to opt.name

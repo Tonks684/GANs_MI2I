@@ -1,40 +1,44 @@
+"""
+Generate the training CLI command from config/train.yaml.
+
+Usage:
+    python command_gen.py                       # prints command
+    python command_gen.py | xargs python pix2pixHD/train_dlmbl.py
+    python command_gen.py --config config/train.yaml
+"""
+import argparse
 import sys
-import os
 from pathlib import Path
 
-model_name = f'dlmbl_vscyto' 
-dataroot = Path('../../')
-output_dir = Path('../../results/')
-python_file = Path('../../pix2pixHD/train_dlmbl.py')
-# Path for chosen training file see source code for explanation of files to choose from.
-GAN_config = {}
-GAN_config['--dataroot'] = dataroot
-GAN_config['--data_type'] = '16'
-GAN_config['--batchSize'] = '4'
-GAN_config['--checkpoints_dir'] = os.path.join(output_dir,f'{model_name}') 
-GAN_config['--label_nc'] = '0'
-GAN_config['--name'] = f'{model_name}'
-GAN_config['--no_instance'] = ''
-GAN_config['--resize_or_crop'] = 'none'
-GAN_config['--input_nc'] = '1'
-GAN_config['--output_nc'] = '1'
-GAN_config['--seed'] = '42'
+try:
+    import yaml
+except ImportError:
+    import json as yaml  # fallback: rename train.yaml → train.json if pyyaml unavailable
 
-GAN_config['--no_vgg_loss'] = ''
-GAN_config['--nThreads'] = '1'
-GAN_config['--gpu_ids'] = '0'
-GAN_config['--loadSize'] = '256'
-GAN_config['--ndf'] = '32'
-GAN_config['--norm'] = 'instance'
-GAN_config['--use_dropout'] = ''
-GAN_config['--fp16'] = '' 
+def load_config(path: str) -> dict:
+    with open(path) as f:
+        return yaml.safe_load(f)
 
-## Used only is retraining from epoch
-# GAN_config['--continue_train'] = ''
-# GAN_config['--which_epoch'] = 'latest'
+def config_to_args(cfg: dict) -> list[str]:
+    """Convert a flat config dict to a list of CLI flag strings."""
+    args = []
+    for key, value in cfg.items():
+        if value is None:
+            continue
+        flag = f"--{key}"
+        if isinstance(value, bool):
+            if value:
+                args.append(flag)
+        else:
+            args.extend([flag, str(value)])
+    return args
 
-command = f"python {python_file}"
-for key, value in GAN_config.items():
-    command += f" {key} {value}"
-print(command)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", default="config/train.yaml",
+                        help="Path to YAML config file")
+    opts = parser.parse_args()
 
+    cfg = load_config(opts.config)
+    cli_args = config_to_args(cfg)
+    print(" ".join(cli_args))

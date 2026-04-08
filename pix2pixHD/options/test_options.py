@@ -67,6 +67,8 @@ class TestOptions(BaseOptions):
                                          help="no. runs for variational_inference.py")
           self.parser.add_argument("--variational_inf_path", type=str,
                                          help="path to save variational inf outputs")
+          self.parser.add_argument("--max_samples", type=int, default=None,
+                                         help="limit inference to this many samples (default: all)")
           self.isTrain = False
      
      def parse(self, save=True):

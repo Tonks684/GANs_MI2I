@@ -1,0 +1,117 @@
+version: "3.9"
+
+# ── volumes ────────────────────────────────────────────────────────────────
+volumes:
+  data:
+  checkpoints:
+
+# ── services ───────────────────────────────────────────────────────────────
+services:
+
+  # ---- Download & split the VSCyto2D dataset ----------------------------
+  download:
+    build: .
+    image: gans-mi2i:latest
+    volumes:
+      - data:/data
+    command: >
+      python download_and_split_dataset.py
+        --output_image_folder /data
+        --crop_size 512
+
+  # ---- Training -----------------------------------------------------------
+  train:
+    build: .
+    image: gans-mi2i:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - data:/data
+      - checkpoints:/checkpoints
+      - ./config:/app/config        # mount config so you can edit without rebuilding
+    working_dir: /app/pix2pixHD
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY:-}   # set in .env or shell to enable W&B
+    command: >
+      python train_dlmbl.py
+        --dataroot /data
+        --checkpoints_dir /checkpoints
+        --name dlmbl_vscyto
+        --data_type 16
+        --input_nc 1
+        --output_nc 1
+        --label_nc 0
+        --loadSize 256
+        --resize_or_crop none
+        --no_instance
+        --no_vgg_loss
+        --batchSize 4
+        --nThreads 4
+        --seed 42
+        --fp16
+        --gpu_ids 0
+
+  # ---- Inference ----------------------------------------------------------
+  inference:
+    build: .
+    image: gans-mi2i:latest
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - data:/data
+      - checkpoints:/checkpoints
+      - ./results:/results
+    working_dir: /app/pix2pixHD
+    command: >
+      python -c "
+      import sys; sys.path.insert(0, '.');
+      from options.test_options import TestOptions
+      from models.models import create_model
+      from data.data_loader_dlmbl import CreateDataLoader
+      from test_dlmbl import inference
+      opt = TestOptions().parse()
+      model = create_model(opt)
+      loader = CreateDataLoader(opt, phase='val')
+      dataset = loader.load_data()
+      inference(dataset, opt, model)
+      "
+
+  # ---- Evaluation ---------------------------------------------------------
+  evaluate:
+    build: .
+    image: gans-mi2i:latest
+    volumes:
+      - data:/data
+      - ./results:/results
+    command: >
+      python -c "
+      import pandas as pd
+      from segmentation_scores import gen_segmentation_scores
+      # TODO: populate image_sets from /results and /data/nuclei/masks
+      print('Evaluation placeholder — wire up image_sets list here')
+      "
+
+  # ---- TensorBoard --------------------------------------------------------
+  tensorboard:
+    image: tensorflow/tensorflow:latest
+    ports:
+      - "6006:6006"
+    volumes:
+      - checkpoints:/checkpoints
+    command: tensorboard --logdir /checkpoints --host 0.0.0.0
+
+  # ---- Run tests ----------------------------------------------------------
+  test:
+    build: .
+    image: gans-mi2i:latest
+    command: pytest tests/ -v --tb=short --ignore=tests/test_data_loader.py

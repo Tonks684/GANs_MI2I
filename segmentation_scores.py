@@ -20,25 +20,21 @@ def psnr_scores(yhats: str, ys: str, bit: int) -> list:
 
     Returns:
         list: List of PSNR scores for each pair of predicted and ground truth images.
-
-    Raises:
-        None
-
     """
     psnr_score_f = []
     for r, g in zip(ys, yhats):
         img_g, img_r = imread(g), imread(r)
         mse = np.mean((img_r - img_g) ** 2)
         if mse == 0:
-            psnr_score_f.append(np.float(100))
+            psnr_score_f.append(float(100))
         elif bit == 8:
             pixel_max = 255.0
             psnr = 20 * (math.log10(pixel_max / math.sqrt(mse)))
-            psnr_score_f.append(np.float(psnr))
+            psnr_score_f.append(float(psnr))
         elif bit == 16:
             pixel_max = np.max(img_r) - np.min(img_r)
             psnr = 20 * (math.log10(pixel_max / math.sqrt(mse)))
-            psnr_score_f.append(np.float(psnr))
+            psnr_score_f.append(float(psnr))
     return psnr_score_f
 
 def intersection_over_union(ground_truth, prediction):
@@ -51,7 +47,6 @@ def intersection_over_union(ground_truth, prediction):
 
     Returns:
     ndarray: Intersection over Union (IoU) score.
-
     """
     # Count objects
     true_objects = len(np.unique(ground_truth))
@@ -96,9 +91,12 @@ def measures_at(threshold, IOU):
     true_positives = np.sum(matches, axis=1) == 1
     false_positives = np.sum(matches, axis=0) == 0
     false_negatives = np.sum(matches, axis=1) == 0
-    assert np.all(np.less_equal(true_positives, 1))
-    assert np.all(np.less_equal(false_positives, 1))
-    assert np.all(np.less_equal(false_negatives, 1))
+    if not np.all(np.less_equal(true_positives, 1)):
+        raise ValueError("true_positives contains values > 1")
+    if not np.all(np.less_equal(false_positives, 1)):
+        raise ValueError("false_positives contains values > 1")
+    if not np.all(np.less_equal(false_negatives, 1)):
+        raise ValueError("false_negatives contains values > 1")
     tp, fp, fn = (
         np.sum(true_positives),
         np.sum(false_positives),
@@ -129,7 +127,6 @@ def compute_af1_results(
     Returns:
         pd.DataFrame: The updated DataFrame with the computed results.
     """
-  
     # Compute IoU
     IOU = intersection_over_union(ground_truth, prediction)
     if IOU.shape[0] > 0:
@@ -148,16 +145,15 @@ def compute_af1_results(
                     'FP': np.NaN, 'FN': np.NaN,
                 }
             else:
-                res = \
-                    {
-                        'Model': model, 'Image': image_name, 'GT_Cell_Count': tp + fn,
-                        'Threshold': t, 'F1': f1, 'IoU': jaccard, 'TP': tp,
-                        'FP': fp, 'FN': fn,
-                    }
+                res = {
+                    'Model': model, 'Image': image_name, 'GT_Cell_Count': tp + fn,
+                    'Threshold': t, 'F1': f1, 'IoU': jaccard, 'TP': tp,
+                    'FP': fp, 'FN': fn,
+                }
             row = len(results)
             results.loc[row] = res
     else:
-        # Calculate F1 score at all threshold
+        # Calculate F1 score at threshold 0.7
         f1, tp, fp, fn = measures_at(.7, IOU)
         # Calculate precision
         precision = tp / (tp + fp)
@@ -172,13 +168,12 @@ def compute_af1_results(
                 'Precision': precision, 'Recall': recall
             }
         else:
-            res = \
-                {
-                    'Model': model, 'Image': image_name, 'GT_Cell_Count': tp + fn,
-                    'Threshold': .7, 'F1': f1, 'Jaccard': jaccard, 'TP': tp,
-                    'FP': fp, 'FN': fn, 'Precision': precision,
-                    'Recall': recall
-                }
+            res = {
+                'Model': model, 'Image': image_name, 'GT_Cell_Count': tp + fn,
+                'Threshold': .7, 'F1': f1, 'Jaccard': jaccard, 'TP': tp,
+                'FP': fp, 'FN': fn, 'Precision': precision,
+                'Recall': recall
+            }
         row = len(results)
         results.loc[row] = res
     return results
@@ -203,9 +198,7 @@ def get_false_negatives(
     Returns:
         pandas.DataFrame: Updated results dataframe with false negatives information.
     """
- 
     # Count number of False Negatives at 0.7 IoU
-    # Compute IoU
     IOU = intersection_over_union(ground_truth, prediction)
     true_objects = len(np.unique(ground_truth))
     if true_objects <= 1:
@@ -246,8 +239,6 @@ def get_splits_and_merges(ground_truth, prediction, results, image_name):
     Returns:
         pandas.DataFrame: The updated DataFrame with the splits and merges information.
     """
-
-    # Compute IoU
     IOU = intersection_over_union(ground_truth, prediction)
     f1, tp, fp, fn = measures_at(0.7, IOU)
     matches = IOU > 0.1
@@ -263,13 +254,12 @@ def get_splits_and_merges(ground_truth, prediction, results, image_name):
     return results
 
 
-
 def gen_segmentation_scores(
     image_sets: list,
     results: list,
-    false_negatives: list=None,
-    splits_merges: list=None,
-    final_scores_output: str=None,
+    false_negatives: list = None,
+    splits_merges: list = None,
+    final_scores_output: str = None,
     multi=False,
 ):
     """
@@ -281,26 +271,25 @@ def gen_segmentation_scores(
         false_negatives (list): A list to store the false negatives.
         splits_merges (list): A list to store the splits and merges.
         final_scores_output (str): The output directory to save the results.
-        multi (bool, optional): Flag indicating whether the evaluation is multi-class or not. Defaults to False.
+        multi (bool, optional): Flag indicating whether the evaluation is multi-class. Defaults to False.
 
     Returns:
         tuple: A tuple containing the computed evaluation metrics, false negatives, and splits and merges.
     """
-
     for index, item in enumerate(tqdm(image_sets)):
         image_name = item[0]
         # Load ground truth data
         y_mask = item[2]
-        if y_mask.shape == 3:
+        if len(y_mask.shape) == 3:
             y_mask = y_mask[:, :, 0]
         # Transform ground truth to label matrix
-            y_mask = skimage.morphology.label(y_mask)
+        y_mask = skimage.morphology.label(y_mask)
         # Load prediction
         yhat_mask = item[3]
-        if yhat_mask.shape == 3:
+        if len(yhat_mask.shape) == 3:
             yhat_mask = yhat_mask[:, :, 0]
         # Transform prediction to label matrix
-            yhat_mask = skimage.morphology.label(yhat_mask)
+        yhat_mask = skimage.morphology.label(yhat_mask)
         # Compute incremental list for each binary mask
         y_mask = skimage.segmentation.relabel_sequential(y_mask)[0]
         yhat_mask = skimage.segmentation.relabel_sequential(yhat_mask)[0]
@@ -327,23 +316,11 @@ def gen_segmentation_scores(
                 splits_merges,
                 image_name,
             )
-    # Double check for removal of blank masks
-        results_zero_obj_removed = results[results['GT_Cell_Count'] != 0]
-        results_zero_obj_removed.to_csv(final_scores_output + '/results.csv')
-    # Print out results
+    # Remove blank masks and save
+    results_zero_obj_removed = results[results['GT_Cell_Count'] != 0]
+    results_zero_obj_removed.to_csv(final_scores_output + '/results.csv')
     print(
         f'{results_zero_obj_removed.shape[0]} images successfully saved in '
         f'{final_scores_output}/results.csv'
     )
-    # false_negatives.to_csv(final_scores_output + '/false_negatives.csv')
-    # print(
-    #     f'{false_negatives.shape[0]} images successfully saved in '
-    #     f'{final_scores_output}/false_negatives.csv'
-    # )
-    # splits_merges.to_csv(final_scores_output + '/splits_merges.csv')
-    # print(
-    #     f'{splits_merges.shape[0]} images successfully saved in '
-    #     f'{final_scores_output}/splits_merges.csv'
-    # )
     return results_zero_obj_removed, false_negatives, splits_merges
- 

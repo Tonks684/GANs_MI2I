@@ -139,6 +139,25 @@ class TrainOptions(BaseOptions):
             help="The size of image buffer that stores previously generated images",
         )
 
+        # W&B experiment tracking
+        self.parser.add_argument(
+            "--use_wandb",
+            action="store_true",
+            help="Log metrics and images to Weights & Biases",
+        )
+        self.parser.add_argument(
+            "--wandb_project",
+            type=str,
+            default="gans-mi2i",
+            help="W&B project name",
+        )
+        self.parser.add_argument(
+            "--wandb_run_name",
+            type=str,
+            default=None,
+            help="W&B run name (defaults to opt.name)",
+        )
+
         self.isTrain = True
 
     def parse(self, save=True):

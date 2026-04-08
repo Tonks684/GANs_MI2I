@@ -1,3 +1,156 @@
+# GANs_MI2I — Virtual Fluorescence Staining with Pix2PixHD
+
+[![CI](https://github.com/Tonks684/GANs_MI2I/actions/workflows/ci.yml/badge.svg)](https://github.com/Tonks684/GANs_MI2I/actions/workflows/ci.yml)
+
+Pix2PixHD-based conditional GAN for translating phase-contrast microscopy images into virtual fluorescent stains (nuclei & cytoplasm channels), adapted from [Wang et al. 2018](https://arxiv.org/abs/1711.11585) for 16-bit single-channel TIFF microscopy data.
+
+---
+
+## Quick Start
+
+### 1. Install
+
+```bash
+git clone https://github.com/Tonks684/GANs_MI2I.git
+cd GANs_MI2I
+
+# Option A — conda (recommended for GPU)
+conda env create -f 04_image_translation_phd.yml
+conda activate 04_image_translation_phd
+
+# Option B — pip
+pip install -e ".[dev]"       # includes test/lint extras
+pip install -e ".[wandb]"     # adds W&B support
+```
+
+### 2. Download data
+
+```bash
+python download_and_split_dataset.py --output_image_folder ./data --crop_size 512
+# Creates ./data/{input,nuclei,cyto}/{train,val}/
+```
+
+### 3. Train
+
+```bash
+# Edit hyperparameters in config/train.yaml, then:
+cd pix2pixHD
+python train_dlmbl.py $(python ../command_gen.py)
+
+# With W&B logging:
+python train_dlmbl.py $(python ../command_gen.py) --use_wandb --wandb_project my-project
+```
+
+### 4. Inference
+
+```bash
+cd pix2pixHD
+# Standard inference (all validation images):
+python -c "
+from options.test_options import TestOptions
+from models.models import create_model
+from data.data_loader_dlmbl import CreateDataLoader
+from test_dlmbl import inference
+opt = TestOptions().parse()
+model = create_model(opt)
+dataset = CreateDataLoader(opt, phase='val').load_data()
+inference(dataset, opt, model)
+"
+
+# Variational sampling (first N images, multiple stochastic draws):
+# add: --variational_inf_runs 10 --max_samples 20
+```
+
+### 5. Evaluate
+
+```bash
+python segmentation_scores.py  # see function gen_segmentation_scores() for API
+```
+
+### 6. View training curves
+
+```bash
+tensorboard --logdir checkpoints/dlmbl_vscyto/tensorboard
+```
+
+---
+
+## Docker
+
+```bash
+# Build once
+docker compose build
+
+# Download data
+docker compose run --rm download
+
+# Train (requires NVIDIA Docker runtime)
+docker compose run --rm train
+
+# Run tests (CPU, no data needed)
+docker compose run --rm test
+
+# TensorBoard at http://localhost:6006
+docker compose up tensorboard
+```
+
+Set `WANDB_API_KEY` in a `.env` file at the repo root to enable W&B inside Docker.
+
+---
+
+## Configuration
+
+All training hyperparameters live in [config/train.yaml](config/train.yaml). Edit that file instead of modifying `command_gen.py`. Key options:
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `name` | `dlmbl_vscyto` | Experiment name (checkpoint subdirectory) |
+| `dataroot` | `../../data` | Path to dataset root |
+| `target` | `nuclei` | Target channel (`nuclei` or `cyto`) |
+| `batchSize` | `4` | Training batch size |
+| `fp16` | `false` | Enable AMP (automatic mixed precision) |
+| `seed` | `42` | RNG seed (enables cuDNN determinism) |
+| `use_wandb` | _(unset)_ | Enable W&B logging |
+
+---
+
+## Training Speed Tips
+
+- `--fp16` enables AMP via `torch.cuda.amp` (~1.5–2× faster on Ampere+ GPUs)
+- `torch.compile` is applied automatically on PyTorch ≥ 2.0 (~10–30% throughput gain)
+- `cudnn.benchmark=True` is set when no seed is fixed (finds fastest convolution algorithm)
+- `zero_grad(set_to_none=True)` is used throughout to reduce memory overhead
+
+---
+
+## Project Structure
+
+```
+GANs_MI2I/
+├── config/
+│   └── train.yaml              # All hyperparameters — edit this
+├── pix2pixHD/
+│   ├── train_dlmbl.py          # Training loop (AMP, torch.compile, W&B, TensorBoard)
+│   ├── test_dlmbl.py           # Inference + variational sampling
+│   ├── encode_features.py      # Feature encoding + KMeans clustering
+│   ├── models/                 # Generator, discriminator, losses
+│   ├── data/                   # 16-bit TIFF paired dataset loader
+│   ├── options/                # CLI argument definitions
+│   └── util/                   # Visualisation utilities
+├── tests/
+│   ├── test_segmentation_scores.py  # IoU, F1, PSNR unit tests
+│   ├── test_data_loader.py          # Dataset smoke tests
+│   └── test_model_forward.py        # Generator/discriminator shape tests
+├── download_and_split_dataset.py
+├── segmentation_scores.py
+├── command_gen.py              # Reads config/train.yaml → CLI flags
+├── Dockerfile
+├── docker-compose.yml
+└── pyproject.toml
+```
+
+---
+
 ## Introduction to Generative Modelling
 In this part of the exercise, we will tackle the same supervised image-to-image translation task but use an alternative approach. Here we will explore a generative modelling approach, specifically a conditional Generative Adversarial Network (cGAN). <br>
 

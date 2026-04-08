@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Environments
+.env
+.venv
+venv/
+env/
+04_image_translation_phd/   # conda env prefix
+
+# Data & outputs
+data/
+checkpoints/
+results/
+*.tiff
+*.tif
+*.zarr
+
+# Model weights
+*.pth
+*.pt
+*.onnx
+pre_trained/*.pth
+pre_trained/*.pt
+
+# TensorBoard
+runs/
+tensorboard/
+
+# W&B
+wandb/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
