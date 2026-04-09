@@ -88,15 +88,12 @@ def measures_at(threshold, IOU):
     int: The number of false negatives.
     """
     matches = IOU > threshold
-    true_positives = np.sum(matches, axis=1) == 1
+    matches_per_gt = np.sum(matches, axis=1)
+    if not np.all(matches_per_gt <= 1):
+        raise ValueError("A GT object matches more than one prediction at this threshold")
+    true_positives = matches_per_gt == 1
     false_positives = np.sum(matches, axis=0) == 0
-    false_negatives = np.sum(matches, axis=1) == 0
-    if not np.all(np.less_equal(true_positives, 1)):
-        raise ValueError("true_positives contains values > 1")
-    if not np.all(np.less_equal(false_positives, 1)):
-        raise ValueError("false_positives contains values > 1")
-    if not np.all(np.less_equal(false_negatives, 1)):
-        raise ValueError("false_negatives contains values > 1")
+    false_negatives = matches_per_gt == 0
     tp, fp, fn = (
         np.sum(true_positives),
         np.sum(false_positives),
