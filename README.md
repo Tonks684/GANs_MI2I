@@ -1,6 +1,7 @@
 # GANs_MI2I — Virtual Fluorescence Staining with Pix2PixHD
 
 [![CI](https://github.com/Tonks684/GANs_MI2I/actions/workflows/ci.yml/badge.svg)](https://github.com/Tonks684/GANs_MI2I/actions/workflows/ci.yml)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/Tonks684/GANs_MI2I/blob/main/LICENSE)
 
 Pix2PixHD-based conditional GAN for translating phase-contrast microscopy images into virtual fluorescent stains (nuclei & cytoplasm channels), adapted from [Wang et al. 2018](https://arxiv.org/abs/1711.11585) for 16-bit single-channel TIFF microscopy data.
 
