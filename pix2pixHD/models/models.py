@@ -1,5 +1,6 @@
 import torch
 
+
 def create_model(opt):
     """
     Create a model based on the given options.
@@ -15,7 +16,7 @@ def create_model(opt):
 
     """
     if opt.model == 'pix2pixHD':
-        from .pix2pixHD_model import Pix2PixHDModel, InferenceModel
+        from .pix2pixHD_model import InferenceModel, Pix2PixHDModel
         if opt.phase == 'train':
             model = Pix2PixHDModel()
         else:

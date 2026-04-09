@@ -1,13 +1,12 @@
 import os
 from collections import OrderedDict
-import util.util as util
+
 import numpy as np
-import cv2
-import torch
+import util.util as util
+from skimage import transform as transform
 from tifffile import imsave
 from tqdm import tqdm
-from skimage import transform as transform
-from util import html
+
 
 def inference(dataset, opt, model):
     """

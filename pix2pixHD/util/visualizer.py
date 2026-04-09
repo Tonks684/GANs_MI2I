@@ -1,13 +1,16 @@
-import numpy as np
-import os
 import ntpath
+import os
 import time
-from . import util as util
-from . import html
+from io import BytesIO
+
+import matplotlib.pyplot as plt
+import numpy as np
 import scipy.misc
 from PIL import Image
-import matplotlib.pyplot as plt
-from io import BytesIO 
+
+from . import html
+from . import util as util
+
 
 class Visualizer():
     """
@@ -73,10 +76,7 @@ class Visualizer():
             img_summaries = []
             for label, image_numpy in visuals.items():
                 # Write the image to a string
-                try:
-                    s = StringIO()
-                except:
-                    s = BytesIO()
+                s = BytesIO()
                 scipy.misc.toimage(image_numpy).save(s, format='tiff')
                 # Create an Image object
                 img_sum = self.tf.Summary.Image(encoded_image_string=s.getvalue(), height=image_numpy.shape[0], width=image_numpy.shape[1])
@@ -157,7 +157,7 @@ class Visualizer():
         Returns:
             None
         """
-        
+
         message = '(epoch: %d, iters: %d, time: %.3f) ' % (epoch, i, t)
         for k, v in errors.items():
             if v != 0:
@@ -201,7 +201,7 @@ class Visualizer():
                 # Plot the Fluorescence Stain image in the second column
                 axs[row, 1].imshow(target[row, 0],cmap='gray',vmin=np.percentile(target[row, 0],5), vmax = np.percentile(target[row, 0],95))
                 axs[row, 1].axis('off')
-                
+
                 # Plot the Virtual Stain image in the third column
                 axs[row, 2].imshow(predictions[row, 0],cmap='gray', vmin=np.percentile(target[row, 0],5), vmax = np.percentile(target[row, 0],95))
                 axs[row, 2].axis('off')

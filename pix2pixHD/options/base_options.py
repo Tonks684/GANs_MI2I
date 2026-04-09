@@ -1,12 +1,12 @@
 #pix2pixHD/options/base_options.py
 import argparse
-import sys
 import os
+import sys
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
-from util import util
-import torch
+import torch  # noqa: E402
+from util import util  # noqa: E402
 
 
 class BaseOptions:
@@ -242,7 +242,7 @@ class BaseOptions:
             type=int,
             help="Resize model output to this shape, fixed to same for x and y",
         )
-        
+
         self.initialized = True
 
     def parse(self, save=True):
@@ -255,13 +255,13 @@ class BaseOptions:
             id = int(str_id)
             if id >= 0:
                 self.opt.gpu_ids.append(id)
-        
+
         # set gpu ids
         if len(self.opt.gpu_ids) > 0:
             torch.cuda.set_device(self.opt.gpu_ids[0])
 
         args = vars(self.opt)
-        # save to the disk        
+        # save to the disk
         expr_dir = os.path.join(self.opt.checkpoints_dir, self.opt.name)
         util.mkdirs(expr_dir)
         if save and not self.opt.continue_train:

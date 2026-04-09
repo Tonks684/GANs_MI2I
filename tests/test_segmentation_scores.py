@@ -2,10 +2,9 @@
 Unit tests for segmentation_scores.py.
 These tests use synthetic masks so no real data is needed.
 """
-import sys
-import os
 import math
-import tempfile
+import os
+import sys
 
 import numpy as np
 import pytest
@@ -17,7 +16,6 @@ from segmentation_scores import (
     measures_at,
     psnr_scores,
 )
-
 
 # ---------------------------------------------------------------------------
 # intersection_over_union

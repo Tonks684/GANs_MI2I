@@ -1,11 +1,12 @@
-import sys
 import os
+import sys
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(parent_dir)
-from .base_options import BaseOptions
-import torch
-from util import util
+import torch  # noqa: E402
+from util import util  # noqa: E402
+
+from .base_options import BaseOptions  # noqa: E402
 
 
 class TrainOptions(BaseOptions):

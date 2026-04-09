@@ -1,10 +1,13 @@
+import os
+
 import numpy as np
 import torch
-import os
 from torch.autograd import Variable
 from util.image_pool import ImagePool
-from .base_model import BaseModel
+
 from . import networks
+from .base_model import BaseModel
+
 
 class Pix2PixHDModel(BaseModel):
     """
@@ -41,7 +44,7 @@ class Pix2PixHDModel(BaseModel):
     def init_loss_filter(self, use_gan_feat_loss, use_vgg_loss):
         flags = (True, use_gan_feat_loss, use_vgg_loss, True, True)
         def loss_filter(g_gan, g_gan_feat, g_vgg, d_real, d_fake):
-            return [l for (l,f) in zip((g_gan,g_gan_feat,g_vgg,d_real,d_fake),flags) if f]
+            return [v for (v, f) in zip((g_gan, g_gan_feat, g_vgg, d_real, d_fake), flags) if f]
         return loss_filter
 
     def initialize(self, opt):
@@ -225,8 +228,8 @@ class Pix2PixHDModel(BaseModel):
         else:
             input_concat = input_label
         fake_image = self.netG.forward(input_concat)
-        # print(f'Input Label {input_label.size()}\nReal Image {real_image.size()}\nFake Image {fake_image.size()}')    
-        
+        # print(f'Input Label {input_label.size()}\nReal Image {real_image.size()}\nFake Image {fake_image.size()}')
+
         # Fake Detection and Loss
         pred_fake_pool = self.discriminate(input_label, fake_image, use_pool=True)
         loss_D_fake = self.criterionGAN(pred_fake_pool, False)
@@ -437,17 +440,17 @@ class Pix2PixHDModel(BaseModel):
 class InferenceModel(Pix2PixHDModel):
     """
     A class representing the inference model for Pix2PixHD.
-    
+
     This class extends the Pix2PixHDModel class and provides a forward method for performing inference.
     """
 
     def forward(self, inp):
         """
         Perform forward pass for the inference model.
-        
+
         Args:
             inp (tuple): A tuple containing the label and instance inputs.
-        
+
         Returns:
             tensor: The output of the inference model.
         """

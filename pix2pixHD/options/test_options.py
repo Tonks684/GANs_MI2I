@@ -1,9 +1,11 @@
-import sys
 import os
+import sys
+
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 
-from .base_options import BaseOptions
+from .base_options import BaseOptions  # noqa: E402
+
 
 class TestOptions(BaseOptions):
      """
@@ -70,7 +72,7 @@ class TestOptions(BaseOptions):
           self.parser.add_argument("--max_samples", type=int, default=None,
                                          help="limit inference to this many samples (default: all)")
           self.isTrain = False
-     
+
      def parse(self, save=True):
         """
         Parse the command line arguments and return the options.
@@ -102,6 +104,5 @@ class TestOptions(BaseOptions):
         ]
         self.opt, unknown = self.parser.parse_known_args(filtered_argv)
         self.opt.isTrain = self.isTrain  # train or test
-        
-        return self.opt   
-        
+
+        return self.opt

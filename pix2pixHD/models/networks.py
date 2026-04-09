@@ -1,11 +1,11 @@
+import functools
+
+import numpy as np
 import torch
 import torch.nn as nn
-import functools
 from torch.autograd import Variable
-import numpy as np
-import sys
-
 from torchvision import models
+
 
 ###############################################################################
 # Functions

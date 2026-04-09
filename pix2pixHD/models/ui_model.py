@@ -1,12 +1,14 @@
-import torch
-from torch.autograd import Variable
 from collections import OrderedDict
+
 import numpy as np
-import os
-from PIL import Image
+import torch
 import util.util as util
-from .base_model import BaseModel
+from PIL import Image
+from torch.autograd import Variable
+
 from . import networks
+from .base_model import BaseModel
+
 
 class UIModel(BaseModel):
     def name(self):

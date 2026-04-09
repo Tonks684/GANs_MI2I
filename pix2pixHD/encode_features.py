@@ -1,8 +1,9 @@
-from options.train_options import TrainOptions
+import os
+
+import numpy as np
 from data.data_loader import CreateDataLoader
 from models.models import create_model
-import numpy as np
-import os
+from options.train_options import TrainOptions
 
 opt = TrainOptions().parse()
 opt.nThreads = 1
@@ -40,7 +41,8 @@ if reencode:
 n_clusters = opt.n_clusters
 load_name = os.path.join(save_path, name + '.npy')
 features = np.load(load_name, allow_pickle=True)[()]
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans  # noqa: E402
+
 centers = {}
 for label in range(opt.label_nc):
     feat = features[label]

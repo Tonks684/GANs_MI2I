@@ -1,13 +1,13 @@
 import math
-import statistics
+
 import numpy as np
 import pandas as pd
 import skimage.io
 import skimage.morphology
 import skimage.segmentation
-from skimage.metrics import structural_similarity as ssim
 from tifffile import imread
 from tqdm import tqdm
+
 
 def psnr_scores(yhats: str, ys: str, bit: int) -> list:
     """

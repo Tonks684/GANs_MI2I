@@ -7,8 +7,6 @@ Usage:
     python command_gen.py --config config/train.yaml
 """
 import argparse
-import sys
-from pathlib import Path
 
 try:
     import yaml

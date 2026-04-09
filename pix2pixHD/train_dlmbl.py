@@ -1,17 +1,17 @@
-import time
-import os
 import logging
+import math
+import os
+import time
+
 import numpy as np
 import torch
-from torch.autograd import Variable
-from collections import OrderedDict
-import math
-from options.train_options import TrainOptions
-from models.models import create_model
-from data.data_loader_dlmbl import CreateDataLoader
 import util.util as util
-from util.visualizer import Visualizer
+from data.data_loader_dlmbl import CreateDataLoader
+from models.models import create_model
+from options.train_options import TrainOptions
+from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
+from util.visualizer import Visualizer
 
 logger = logging.getLogger(__name__)
 

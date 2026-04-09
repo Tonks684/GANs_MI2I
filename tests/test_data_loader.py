@@ -3,9 +3,8 @@ Smoke tests for the aligned TIFF dataset.
 Creates a tiny synthetic dataset on disk and verifies the loader returns
 correctly shaped tensors without touching remote data.
 """
-import sys
 import os
-import tempfile
+import sys
 import types
 
 import numpy as np
@@ -17,8 +16,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "pix2pixHD"))
 
 try:
     import torch
-    from tifffile import imwrite
     from data.aligned_dataset_dlmbl import AlignedDatasetDLMBL
+    from tifffile import imwrite
 except ImportError as e:
     pytest.skip(f"Skipping data-loader tests: {e}", allow_module_level=True)
 

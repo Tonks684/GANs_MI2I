@@ -1,15 +1,14 @@
-import numpy as np
-import zarr
-import os
-from tqdm import tqdm
-import random
-from tifffile import imread,imwrite
+import argparse
 import os
 import random
 import shutil
 from pathlib import Path
-import argparse
-import shutil
+
+import numpy as np
+import zarr
+from tifffile import imwrite
+from tqdm import tqdm
+
 
 def crop_image(image, crop_size=512):
     """
@@ -25,12 +24,12 @@ def crop_image(image, crop_size=512):
     """
     crops = []
     height, width = image.shape[:2]
-    
+
     for i in range(0, height, crop_size):
         for j in range(0, width, crop_size):
             crop = image[i:i+crop_size, j:j+crop_size]
             crops.append(crop)
-    
+
     return crops
 
 def move_files(file_list, split_type, folders):
@@ -68,25 +67,25 @@ def create_train_val_split(input_folder, nuclei_folder, cyto_folder, split_ratio
         'nuclei': Path(nuclei_folder),
         'cyto': Path(cyto_folder)
     }
-    
+
     # Create train and val folders
     for folder_type in folders.values():
         (folder_type / 'train').mkdir(parents=True, exist_ok=True)
         (folder_type / 'val').mkdir(parents=True, exist_ok=True)
-    
+
     # Get list of all images (assuming all folders have the same images)
     image_files = [f for f in os.listdir(folders['input']) if os.path.isfile(folders['input'] / f)]
-    
+
     # Shuffle images
     random.shuffle(image_files)
-    
+
     # Calculate split index
     split_index = int(len(image_files) * split_ratio)
-    
+
     # Split into train and val
     train_files = image_files[:split_index]
     val_files = image_files[split_index:]
-    
+
     # Move train and val files
     move_files(train_files, 'train',folders)
     move_files(val_files, 'val', folders)
@@ -109,7 +108,7 @@ def create_train_val_split(input_folder, nuclei_folder, cyto_folder, split_ratio
 #         output_path = f'{args.output_image_folder}/{channel_folder}/{a549_hoechst_folder}_{img}_crop{i}.tiff'
 #         imwrite(output_path, crop.astype(np.float32), imagej=True)
 #         print(f"Saved crop to {output_path}")
-    
+
 
 if __name__ == "__main__":
 
@@ -140,7 +139,7 @@ if __name__ == "__main__":
                 imwrite(f'{args.output_image_folder}/nuclei/train/{a549_hoechst_folder}_{img}.tiff',nuclei.astype(np.float32),imagej=True)
                 cyto = dataset_np[0,2,img]
                 imwrite(f'{args.output_image_folder}/cyto/train/{a549_hoechst_folder}_{img}.tiff',cyto.astype(np.float32),imagej=True)
-                
+
         except Exception as e:
             print(f"Failed to access remote dataset: {e}")
 
@@ -157,15 +156,15 @@ if __name__ == "__main__":
             for img in tqdm(range(dataset_np.shape[2])):
                 input_x = dataset_np[0,0,img]
                 imwrite(f'{args.output_image_folder}/input/val/{a549_hoechst_folder}_{img}.tiff',input_x.astype(np.float32),imagej=True)
-                
+
                 nuclei = dataset_np[0,1,img]
                 imwrite(f'{args.output_image_folder}/nuclei/val/{a549_hoechst_folder}_{img}.tiff',nuclei.astype(np.float32),imagej=True)
-                
+
                 cyto = dataset_np[0,2,img]
                 imwrite(f'{args.output_image_folder}/cyto/val/{a549_hoechst_folder}_{img}.tiff',cyto.astype(np.float32),imagej=True)
-                
+
                 nuclei_masks = dataset_np[0,3,img]
                 imwrite(f'{args.output_image_folder}/nuclei/masks{a549_hoechst_folder}_{img}.tiff',nuclei_masks.astype(np.uint16),imagej=True)
-                
+
         except Exception as e:
             print(f"Failed to access remote dataset: {e}")

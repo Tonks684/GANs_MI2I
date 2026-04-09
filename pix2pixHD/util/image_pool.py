@@ -1,6 +1,9 @@
 import random
+
 import torch
 from torch.autograd import Variable
+
+
 class ImagePool():
     """
     A class representing an image pool for storing and retrieving images.

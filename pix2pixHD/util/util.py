@@ -1,11 +1,12 @@
 from __future__ import print_function
-import torch
-import numpy as np
-import random
-from PIL import Image
-import numpy as np
+
 import os
+import random
+
+import numpy as np
+import torch
 from tifffile import imsave
+
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
 
@@ -138,7 +139,7 @@ def save_image(image_numpy, image_path):
     #image_pil = Image.fromarray(image_numpy)
     #image_pil.save(image_path)
     imsave(image_path.replace('.jpg','.tiff'),image_numpy.astype(np.float32),imagej=True)
-    
+
 def mkdirs(paths):
     if isinstance(paths, list) and not isinstance(paths, str):
         for path in paths:
@@ -225,4 +226,4 @@ def set_seed(random_seed: int) -> None:
     torch.backends.cudnn.benchmark = False
     np.random.seed(random_seed)
 
-    
+
