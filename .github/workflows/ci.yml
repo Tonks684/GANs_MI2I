@@ -46,14 +46,10 @@ jobs:
             ${{ runner.os }}-pip-${{ matrix.python-version }}-
 
       - name: Install CPU-only PyTorch
-        run: |
-          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        run: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
       - name: Install package and dev extras
-        run: pip install -e ".[dev]" --no-deps
-
-      - name: Install remaining dependencies
-        run: pip install tifffile scikit-image scipy pandas dominate pyyaml tqdm pillow zarr tensorboard
+        run: pip install -e ".[dev]" --extra-index-url https://download.pytorch.org/whl/cpu
 
       - name: Run tests
         run: pytest tests/ -v --tb=short --ignore=tests/test_data_loader.py
