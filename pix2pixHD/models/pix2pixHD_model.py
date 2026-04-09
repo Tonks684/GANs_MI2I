@@ -2,7 +2,6 @@ import os
 
 import numpy as np
 import torch
-from torch.autograd import Variable
 from util.image_pool import ImagePool
 
 from . import networks
@@ -169,17 +168,17 @@ class Pix2PixHDModel(BaseModel):
             inst_map = inst_map.data.cuda()
             edge_map = self.get_edges(inst_map)
             input_label = torch.cat((input_label, edge_map), dim=1)
-        input_label = Variable(input_label, volatile=infer)
+        input_label = input_label
 
         # real images for training
         if real_image is not None:
-            real_image = Variable(real_image.data.cuda())
+            real_image = real_image.data.cuda()
 
         # instance map for feature encoding
         if self.use_features:
             # get precomputed feature maps
             if self.opt.load_features:
-                feat_map = Variable(feat_map.data.cuda())
+                feat_map = feat_map.data.cuda()
             if self.opt.label_feat:
                 inst_map = label_map.cuda()
 
@@ -273,8 +272,7 @@ class Pix2PixHDModel(BaseModel):
             fake_image (Variable): The generated fake image.
         """
         # Encode Inputs
-        image = Variable(image) if image is not None else None
-        input_label, inst_map, real_image, _ = self.encode_input(Variable(label), Variable(inst), image, infer=True)
+        input_label, inst_map, real_image, _ = self.encode_input(label, inst, image, infer=True)
 
         # Fake Generation
         if self.use_features:
@@ -340,7 +338,7 @@ class Pix2PixHDModel(BaseModel):
                   The keys of the dictionary are the labels, and the values are numpy arrays
                   representing the encoded features for each label.
         """
-        image = Variable(image.cuda(), volatile=True)
+        image = image.cuda()
         feat_num = self.opt.feat_num
         h, w = inst.size()[2], inst.size()[3]
         block_num = 32

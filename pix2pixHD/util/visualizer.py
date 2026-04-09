@@ -5,7 +5,6 @@ from io import BytesIO
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.misc
 from PIL import Image
 
 from . import html
@@ -77,7 +76,7 @@ class Visualizer():
             for label, image_numpy in visuals.items():
                 # Write the image to a string
                 s = BytesIO()
-                scipy.misc.toimage(image_numpy).save(s, format='tiff')
+                Image.fromarray(image_numpy).save(s, format='tiff')
                 # Create an Image object
                 img_sum = self.tf.Summary.Image(encoded_image_string=s.getvalue(), height=image_numpy.shape[0], width=image_numpy.shape[1])
                 # Create a Summary value

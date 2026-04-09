@@ -4,7 +4,6 @@ import numpy as np
 import torch
 import util.util as util
 from PIL import Image
-from torch.autograd import Variable
 
 from . import networks
 from .base_model import BaseModel
@@ -64,9 +63,9 @@ class UIModel(BaseModel):
             inst_img = inst_img.resize((w, h), Image.NEAREST)
             self.inst_map = self.toTensor(inst_img).cuda()
             self.edge_map = self.get_edges(self.inst_map)
-            self.net_input = Variable(torch.cat((self.input_label, self.edge_map), dim=1), volatile=True)
+            self.net_input = torch.cat((self.input_label, self.edge_map), dim=1)
         else:
-            self.net_input = Variable(self.input_label, volatile=True)
+            self.net_input = self.input_label
 
         self.features_clustered = np.load(feat_path).item()
         self.object_map = self.inst_map if opt.instance_feat else self.label_map

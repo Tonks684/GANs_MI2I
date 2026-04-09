@@ -9,7 +9,6 @@ import util.util as util
 from data.data_loader_dlmbl import CreateDataLoader
 from models.models import create_model
 from options.train_options import TrainOptions
-from torch.autograd import Variable
 from torch.utils.tensorboard import SummaryWriter
 from util.visualizer import Visualizer
 
@@ -69,8 +68,8 @@ def train_epoch(opt, model, visualizer, dataset_train, optimizer_G, optimizer_D,
         ############## Forward Pass ######################
         with torch.cuda.amp.autocast(enabled=opt.fp16):
             losses, generated = model(
-                Variable(data['label']), Variable(data['inst']),
-                Variable(data['image']), Variable(data['feat']), infer=save_fake,
+                data['label'], data['inst'],
+                data['image'], data['feat'], infer=save_fake,
             )
 
         losses = [torch.mean(x) if not isinstance(x, int) else x for x in losses]
@@ -143,8 +142,8 @@ def val_epoch(opt, model, dataset_val):
         for data in dataset_val:
             with torch.cuda.amp.autocast(enabled=opt.fp16):
                 losses, generated = model(
-                    Variable(data['label']), Variable(data['inst']),
-                    Variable(data['image']), Variable(data['feat']), infer=True,
+                    data['label'], data['inst'],
+                    data['image'], data['feat'], infer=True,
                 )
             losses = [torch.mean(x) if not isinstance(x, int) else x for x in losses]
             loss_dict = dict(zip(model.module.loss_names, losses))

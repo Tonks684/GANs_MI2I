@@ -11,7 +11,7 @@ jobs:
     name: Lint (ruff)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -31,7 +31,7 @@ jobs:
         python-version: ["3.9", "3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v5
         with:
@@ -50,10 +50,10 @@ jobs:
           pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
       - name: Install package and dev extras
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev]" --no-deps
 
-      - name: Install remaining test dependencies
-        run: pip install tifffile scikit-image scipy pandas dominate pyyaml
+      - name: Install remaining dependencies
+        run: pip install tifffile scikit-image scipy pandas dominate pyyaml tqdm pillow zarr tensorboard
 
       - name: Run tests
         run: pytest tests/ -v --tb=short --ignore=tests/test_data_loader.py
